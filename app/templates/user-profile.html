@@ -1,0 +1,127 @@
+{% extends "header.html" %}
+
+{% block body %}
+<div class="container">
+    <h1>{{user['username']}}</h1>
+  	<hr>
+	<div class="row">
+      <!-- left column -->
+      <div class="col-md-4">
+        <div class="text-center">
+          <img src="//placehold.it/100" class="avatar img-circle" alt="avatar">
+          <h6>Upload a different photo...</h6>
+          
+          <input type="file" class="form-control">
+        </div>
+        <div class="content-header col-pd-9">
+            <h3>Level of Access</h3>
+        </div>
+        <div class="content-body col-md-9">
+          <div class="col-md-8">
+              <label class="control-label">Admin &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp: </label><label><b>{{user['is_admin']}}</b></label><br>
+              <label class="control-label">Developer : </label><label><b>{{user['is_dev']}}</b></label>
+              <label class="control-label">Engineer &nbsp&nbsp&nbsp: </label><label><b>{{user['is_eng']}}</b></label>
+          </div>
+        </div>
+      </div>
+      
+      <!-- edit form column -->
+      <div class="col-md-8 personal-info">
+        <h3>Personal Info</h3>
+        <form class="form-horizontal" role="form">
+          <div class="form-group">
+            <label class="col-lg-3 control-label">First name:</label>
+            <div class="col-lg-7">
+                <input class="form-control" type="text" value="{{user['first_name']}}">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="col-lg-3 control-label">Last name:</label>
+            <div class="col-lg-7">
+                <input class="form-control" type="text" value="{{user['last_name']}}">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="col-lg-3 control-label">Company:</label>
+            <div class="col-lg-7">
+                <input class="form-control" type="text" value="{{user['company']}}">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="col-lg-3 control-label">Job Title:</label>
+            <div class="col-lg-7">
+                <input class="form-control" type="text" value="{{user['job_title']}}">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="col-lg-3 control-label">Email:</label>
+            <div class="col-lg-7">
+                <input class="form-control" type="text" value="{{user['email']}}">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="col-lg-3 control-label">State:</label>
+            <div class="col-lg-7">
+                <input class="form-control" type="text" value="{{user['state']}}">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="col-lg-3 control-label">Country:</label>
+            <div class="col-lg-7">
+                <input class="form-control" type="text" value="{{user['country']}}">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="col-md-3 control-label">Password:</label>
+            <div class="col-md-7">
+              <input class="form-control" type="password" value="11111122333">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="col-md-3 control-label">Confirm password:</label>
+            <div class="col-md-7">
+              <input class="form-control" type="password" value="11111122333">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="col-md-3 control-label"></label>
+            <div class="col-md-7">
+              <input type="button" class="btn btn-primary" value="Save Changes">
+              <span></span>
+              <input type="reset" class="btn btn-default" value="Cancel">
+            </div>
+          </div>
+        </form>
+      </div>
+      <br>
+      <div class="col-md-7 password-fields">
+        <h3>Change Password</h3>
+        
+        <form class="form-horizontal" role="form">
+          <div class="form-group">
+            <label class="col-md-3 control-label">Password:</label>
+            <div class="col-md-7">
+              <input class="form-control" type="password">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="col-md-3 control-label">Confirm password:</label>
+            <div class="col-md-7">
+              <input class="form-control" type="password">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="col-md-3 control-label"></label>
+            <div class="col-md-7">
+              <input type="button" class="btn btn-primary" value="Change Password">
+            </div>
+          </div>
+        </form>
+        <hr>
+      
+      </div>
+      </div>
+  </div>
+</div>
+<hr>
+{% endblock %}
