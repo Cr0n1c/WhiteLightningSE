@@ -1,0 +1,288 @@
+{% extends "header.html" %}  
+{% block header %}
+<link rel="stylesheet" href="static/css/jquery-jvectormap-1.2.2.css">
+{% endblock %}
+
+{% block body %}
+<section class="content">
+  <div class="row">
+	<div class="col-lg-3 col-xs-6">
+	  <div class="small-box bg-green">
+		<div class="inner">
+		  <h3>150</h3>
+
+		  <p>Agents Deployed</p>
+		</div>
+		<div class="icon">
+		  <i class="ion ion-android-checkmark-circle"></i>
+		</div>
+		<a href="#" class="small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
+	  </div>
+	</div>
+	<!-- ./col -->
+	<div class="col-lg-3 col-xs-6">
+	  <!-- small box -->
+	  <div class="small-box bg-aqua">
+		<div class="inner">
+		  <h3>83<sup style="font-size: 20px">%</sup></h3>
+
+		  <p>Compliant Devices</p>
+		</div>
+		<div class="icon">
+		  <i class="ion ion-stats-bars"></i>
+		</div>
+		<a href="#" class="small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
+	  </div>
+	</div>
+	<!-- ./col -->
+	<div class="col-lg-3 col-xs-6">
+	  <!-- small box -->
+	  <div class="small-box bg-yellow">
+		<div class="inner">
+		  <h3>440</h3>
+
+		  <p>Descovered Devices</p>
+		</div>
+		<div class="icon">
+		  <i class="ion ion-network"></i>
+		</div>
+		<a href="#" class="small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
+	  </div>
+	</div>
+	<!-- ./col -->
+	<div class="col-lg-3 col-xs-6">
+	  <!-- small box -->
+	  <div class="small-box bg-red">
+		<div class="inner">
+		  <h3>65</h3>
+
+		  <p>Active Alerts</p>
+		</div>
+		<div class="icon">
+		  <i class="ion ion-alert-circled"></i>
+		</div>
+		<a href="#" class="small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
+	  </div>
+	</div>
+	<!-- ./col -->
+  </div>
+  <div class="row">
+	<div class="col-md-12">
+	  <!-- MAP & BOX PANE -->
+	  <div class="box box-success">
+		<div class="box-header with-border">
+		  <h3 class="box-title">Agent Report</h3>
+
+		  <div class="box-tools pull-right">
+			<button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
+			</button>
+			<button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button>
+		  </div>
+		</div>
+		<!-- /.box-header -->
+		<div class="box-body no-padding">
+		  <div class="row">
+			<div class="col-md-9 col-sm-8">
+			  <div class="pad">
+				<!-- Map will be created here -->
+				<div id="world-map-markers" style="height: 325px;"></div>
+			  </div>
+			</div>
+			<!-- /.col -->
+			<div class="col-md-3 col-sm-4">
+			  <div class="pad box-pane-right bg-green" style="min-height: 280px">
+				<div class="description-block margin-bottom">
+				  <div class="sparkbar pad" data-color="#fff">90,70,90,70,75,80,70</div>
+				  <h5 class="description-header">37</h5>
+				  <span class="description-text">New Devices Detected</span>
+				</div>
+				<!-- /.description-block -->
+				<div class="description-block margin-bottom">
+				  <div class="sparkbar pad" data-color="#fff">90,50,90,70,61,83,63</div>
+				  <h5 class="description-header">94%</h5>
+				  <span class="description-text">Average Load</span>
+				</div>
+				<!-- /.description-block -->
+				<div class="description-block">
+				  <div class="sparkbar pad" data-color="#fff">90,50,90,70,61,83,63</div>
+				  <h5 class="description-header">250</h5>
+				  <span class="description-text">Average Alerts</span>
+				</div>
+			  </div>
+			</div>
+		  </div>
+		</div>
+	  </div>
+	</div>
+  </div>
+    <div class="row">
+	<div class="col-md-6">
+	  <div class="box box-info">
+		<div class="box-header with-border">
+		  <h3 class="box-title">Latest Remediations</h3>
+
+		  <div class="box-tools pull-right">
+			<button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
+			</button>
+			<button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button>
+		  </div>
+		</div>
+		<!-- /.box-header -->
+		<div class="box-body">
+		  <div class="table-responsive">
+			<table class="table no-margin">
+			  <thead>
+			  <tr>
+				<th>Alert ID</th>
+				<th>Description</th>
+				<th>Status</th>
+				<th>Action Type</th>
+				<th>Remediation Time</th>
+			  </tr>
+			  </thead>
+			  <tbody>
+			  <tr>
+				<td><a href="pages/examples/invoice.html">OR9842</a></td>
+				<td>Busybox uploaded to device</td>
+				<td><span class="label label-danger">Quarantined</span></td>
+				<td><span class="label label-success">Automated</span></td>
+				<td>2 mins</td>
+			  </tr>
+			  <tr>
+				<td><a href="pages/examples/invoice.html">OR1848</a></td>
+				<td>Brute Force Login Attempts</td>
+				<td><span class="label label-warning">Blacklisted IP</span></td>
+				<td><span class="label label-success">Automated</span></td>
+				<td>5 mins</td>
+			  </tr>
+			  <tr>
+				<td><a href="pages/examples/invoice.html">OR9842</a></td>
+				<td>New network detected</td>
+				<td><span class="label label-info">Informational</span></td>
+				<td><span class="label label-success">Automated</span></td>
+				<td>10 mins</td>
+			  </tr>
+			  <tr>
+				<td><a href="pages/examples/invoice.html">OR7429</a></td>
+				<td>Malicious user activity</td> 
+				<td><span class="label label-danger">Quarantined</span></td>
+				<td><span class="label label-warning">Manual</span></td>
+				<td>1 Day</td>
+			  </tr>
+			  <tr>
+				<td><a href="pages/examples/invoice.html">OR1848</a></td>
+				<td>Detected outdated firmware</td>
+				<td><span class="label label-success">Updated</span></td>
+				<td><span class="label label-success">Automated</span></td>
+				<td>1 Day</td>
+			  </tr>
+			  <tr>
+				<td><a href="pages/examples/invoice.html">OR7429</a></td>
+				<td>Detected outdated firmware</td>
+				<td><span class="label label-success">Updated</span></td>
+				<td><span class="label label-success">Automated</span></td>
+				<td>1 Day</td>
+			  </tr>
+			  <tr>
+				<td><a href="pages/examples/invoice.html">OR9842</a></td>
+				<td>Service created unknown outbound connection</td>
+				<td><span class="label label-info">Benign</span></td>
+				<td><span class="label label-warning">Manual</span></td>
+				<td>1 Hour</td>
+			  </tr>
+			  </tbody>
+			</table>
+		  </div>
+		</div>
+		<div class="box-footer clearfix">
+		  <a href="javascript:void(0)" class="btn btn-sm btn-info btn-flat pull-right">View More</a>
+		</div>
+	  </div>
+	</div>
+  
+	<div class="col-md-6">
+	  <div class="box box-danger">
+		<div class="box-header with-border">
+		  <h3 class="box-title">Longest Active Alerts</h3>
+
+		  <div class="box-tools pull-right">
+			<button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
+			</button>
+			<button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button>
+		  </div>
+		</div>
+		<!-- /.box-header -->
+		<div class="box-body">
+		  <div class="table-responsive">
+			<table class="table no-margin">
+			  <thead>
+			  <tr>
+				<th>Alert ID</th>
+				<th>Description</th>
+				<th>Status</th>
+				<th>Age</th>
+			  </tr>
+			  </thead>
+			  <tbody>
+			  <tr>
+				<td><a href="pages/examples/invoice.html">OR9772</a></td>
+				<td>Malicious user activity</td>
+				<td><span class="label label-danger">Unknown</span></td>
+				<td>3 Weeks</td>
+			  </tr>
+			  <tr>
+				<td><a href="pages/examples/invoice.html">OR2248</a></td>
+				<td>Apache Struts vulnerability detected</td>
+				<td><span class="label label-warning">Assigned</span></td>
+				<td>3 Weeks</td>
+			  </tr>
+			  <tr>
+				<td><a href="pages/examples/invoice.html">OR2456</a></td>
+				<td>EOL System connected to network</td>
+				<td><span class="label label-danger">Unknown</span></td>
+				<td>15 Days</td>
+			  </tr>
+			  <tr>
+				<td><a href="pages/examples/invoice.html">OR8374</a></td>
+				<td>Lost communications with endpoint</td> 
+				<td><span class="label label-warning">Assigned</span></td>
+				<td>10 Days</td>
+			  </tr>
+			  <tr>
+				<td><a href="pages/examples/invoice.html">OR1900</a></td>
+				<td>Critical file modified. /etc/passwd</td>
+				<td><span class="label label-warning">Assigned</span></td>
+				<td>9 Days</td>
+			  </tr>
+			  <tr>
+				<td><a href="pages/examples/invoice.html">OR6654</a></td>
+				<td>Detected new service with listener on TCP 4444</td>
+				<td><span class="label label-warning">Assigned</span></td>
+				<td>5 Days</td>
+			  </tr>
+			  <tr>
+				<td><a href="pages/examples/invoice.html">OR0998</a></td>
+				<td>Maximum connections on device.</td>
+				<td><span class="label label-danger">Unknown</span></td>
+				<td>5 Days</td>
+			  </tr>
+			  </tbody>
+			</table>
+		  </div>
+		</div>
+		<div class="box-footer clearfix">
+		  <a href="javascript:void(0)" class="btn btn-sm btn-info btn-flat pull-right">View All Active Alerts</a>
+		</div>
+	  </div>
+	</div>
+  
+  </div>
+</section>
+{% endblock %}
+
+{% block footer %}
+<script src="static/js/jquery-jvectormap-1.2.2.min.js"></script>
+<script src="static/js/jquery-jvectormap-world-mill-en.js"></script>
+<script src="static/js/page.dashboard.js"></script>
+<script src="static/js/jquery.sparkline.min.js"></script>
+{% endblock %}
