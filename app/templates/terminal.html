@@ -1,0 +1,36 @@
+{% extends "header.html" %}  
+{% block header %}
+<link rel="stylesheet" href="static/css/jquery-jvectormap-1.2.2.css">
+<link href="static/css/jquery.terminal.css" rel="stylesheet"/>
+{% endblock %}
+
+{% block body %}
+<div id="jsterm">
+</div> 
+{% endblock %}
+
+{% block footer %}
+<script src="static/js/jquery.terminal.min.js"></script>
+<script src="static/js/jquery-jvectormap-1.2.2.min.js"></script>
+<script src="static/js/jquery-jvectormap-world-mill-en.js"></script>
+<script src="static/js/page.dashboard.js"></script>
+<script src="static/js/jquery.sparkline.min.js"></script>
+<script language=javascript>
+jQuery(function($, undefined) {
+    $('#jsterm').terminal(function(command) {
+        if (command !== '') {
+            var result = window.eval(command);
+            if (result != undefined) {
+                this.echo(String(result));
+            }
+        }
+    }, {
+        greetings: 'Javascript Interpreter',
+        name: 'js_demo',
+        width: '100%',
+        height: '100%',
+        prompt: 'js> '
+    });
+});
+</script>
+{% endblock %}
