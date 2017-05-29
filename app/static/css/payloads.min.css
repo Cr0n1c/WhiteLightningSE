@@ -1,0 +1,7 @@
+td.payload-detail-control {
+    background: url('../img/details_open.png') no-repeat center center;
+    cursor: pointer;
+}
+tr.shown td.payload-detail-control {
+    background: url('../img/details_close.png') no-repeat center center;
+}

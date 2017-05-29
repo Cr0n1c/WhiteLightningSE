@@ -1,115 +1,188 @@
 {% extends "header.html" %}
+
 {% block header %}
-<link rel="stylesheet" href="static/css/dataTables.bootstrap.min.css"/>
-<link rel="stylesheet" href="static/css/assets.min.css"/>
-<link rel="stylesheet" href="static/css/jquery.dataTables.css"/>
+  <link rel="stylesheet" href="static/css/dataTables.bootstrap.css">
+  <link rel="stylesheet" href="static/css/bootstrap-toggle.min.css">
+  <link href="static/css/wizard.min.css" rel="stylesheet">
+  <link href="static/css/payload-registration.min.css" rel="stylesheet" >
+  <link href="static/css/payloads.min.css" rel="stylesheet">
+  <link href="static/css/jquery.dataTables.css" rel="stylesheet">
 {% endblock %}
 
 {% block body %}
-    <section class="content">
       <div class="row">
         <div class="col-xs-12">
           <div class="box">
-            <div class="box-body">    
-                <table id="assets-table" class="display nowrap" cellspacing="0" width="100%">
-        <thead>
-            <tr>
-                <th></th>
-                <th>Name</th>
-                <th>IP Address</th>
-                <th>MAC Address</th>
-                <th>Model</th>
-                <th>Version</th>
-                <th>Last Heartbeat</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr data-child-value="properties_2">
-                <td class="details-control"></td>
-                <td>gateway-buf-02.kore.gq</td>
-                <td>10.10.20.1</td>
-                <td>01:44:24:bc:de:ad</td>
-                <td>Microtik 3414</td>
-                <td>5.04</td>
-                <td class="text-danger"><b>April 24, 2017 09:53:13 Z</b></td>
-            </tr>
-            <tr data-child-value="properties_3">
-                <td class="details-control"></td>
-                <td>gateway-nyc-01.kore.gq</td>
-                <td>10.10.10.1</td>
-                <td>01:3f:22:fe:de:ad</td>
-                <td>D-Link 815N Version A</td>
-                <td class="text-danger"><b>1.14</b></td>
-                <td>May 5, 2017 08:03:56 Z</td>
-            </tr>
-            <tr data-child-value="properties_4">
-                <td class="details-control"></td>
-                <td>public-wifi-nyc-01.kore.gq</td>
-                <td>192.168.1.1</td>
-                <td>01:21:bc:dd:af:a1</td>
-                <td>Linksys B5204</td>
-                <td>12.04.01</td>
-                <td>May 5, 2017 08:12:44 Z</td>
-            </tr>
-            <tr data-child-value="properties_5">
-                <td class="details-control"></td>
-                <td>internal-wifi-01.kore.gq</td>
-                <td>10.10.200.254</td>
-                <td>01:3f:22:ff:84:9d</td>
-                <td>D-Link 815N Version A</td>
-                <td>1.15</td>
-                <td>May 5, 2017 07:57:00 Z</td>
-            </tr>
-            <tr data-child-value="properties_6">
-                <td class="details-control"></td>
-                <td>gateway-nyc-02.kore.gq</td>
-                <td>10.10.10.2</td>
-                <td>01:3f:22:fe:de:aa</td>
-                <td>D-Link 815N Version A</td>
-                <td class="text-danger"><b>1.14</b></td>
-                <td>May 5, 2017 08:12:43 Z</td>
-            </tr>
-            <tr data-child-value="properties_7">
-                <td class="details-control"></td>
-                <td>gateway-nyc-03.kore.gq</td>
-                <td>10.10.10.254</td>
-                <td>01:3f:22:fe:df:ad</td>
-                <td>D-Link 815N Version A</td>
-                <td>1.14</td>
-                <td>May 5, 2017 08:02:54 Z</td>
-            </tr>
-            <tr data-child-value="properties_8">
-                <td class="details-control"></td>
-                <td>public-wifi-nyc-02.kore.gq</td>
-                <td>192.168.1.254</td>
-                <td>01:bc:49:fe:be:ef</td>
-                <td>Actiontec P90x</td>
-                <td>0.9b</td>
-                <td>May 5, 2017 08:11:56 Z</td>
-            </tr>
-        </tbody>
-        <tfoot>
-            <tr>
-                <th></th>
-                <th>Name</th>
-                <th>IP Address</th>
-                <th>MAC Address</th>
-                <th>Model</th>
-                <th>Version</th>
-                <th>Last Heartbeat</th>
-            </tr>
-        </tfoot>
-    </table>
-</div>
-</div>
-</div>
-</div>
-</section>
+            <div class="box-header">
+               <button type="button" class="btn btn-info" data-toggle="modal" data-target="#registration">Add Payload</button>
+               <!-- Modal -->
+               <div id="registration" class="modal fade" role="dialog">
+                  <div class="modal-dialog">
+
+        <!-- Modal content-->					
+       <div class="container">
+      	 <div class="wizard-container">
+	    <div class="card wizard-card" data-color="blue" id="wizardProfile">
+	      <form action="" method="post">
+	        <div class="wizard-header">
+	          <h3>
+	            <b>WHITELIGHTNING</b> PAYLOAD BUILDER <br>
+ 	            <small>Automating MiTM Attacks</small>
+	          </h3>
+	         </div>
+                 <div class="wizard-navigation">
+                   <ul>
+                     <li><a href="#callback-info" data-toggle="tab">Callback</a></li>
+                     <li><a href="#spoof-info" data-toggle="tab">Spoofed Site</a></li>
+                     <li><a href="#payload-info" data-toggle="tab">Payload Config</a></li>
+                   </ul>
+                 </div>
+                 <div class="tab-content">
+                   <div class="tab-pane" id="callback-info">
+                     <h4 class="info-text">Callback Information</h4>
+                     <div class="row">
+                        <div class="col-sm-5 col-sm-offset-1">
+                           <div class="form-group">
+                              <label>Callback Address #1</label>
+                              <input name="cb_1" type="text" placeholder="URL for the initial redirection" class="form-control">
+                           </div>
+                        </div>
+                        <div class="col-sm-5">
+                           <div class="form-group">
+                              <label>Callback Port #1</label>
+                              <input name="cb_2_port" placeholder="443" value="443" class="form-control">
+                           </div>
+                        </div>
+                     </div>
+                     <div class="row">
+                       <div class="col-sm-5 col-sm-offset-1">
+                         <div class="form-group">
+                           <label>Callback Address #2</label>
+                           <input name="cb_2" type="text" placeholder="URL for the follow on injection" class="form-control">
+                         </div>
+                       </div>
+                       <div class="col-sm-5">
+                         <div class="form-group">
+                           <label>Callback Port #2</label>
+                           <input name="cb_2_port" placeholder="443" value="443" class="form-control">
+                         </div>
+                       </div>
+                     </div>
+                   </div>
+                   <div class="tab-pane" id="spoof-info">
+                      <h4 class="info-text">Spoofed Site Information</h4>
+                      <div class="row">
+                        <div class="col-sm-5 col-sm-offset-1">
+                          <div class="form-group">
+                            <label>Spoofed Site</label>
+                            <select name="spoof-template" class="form-control">
+                              <option value="linked-in">LinkedIn</option>
+                              <option value="facebook">Facebook</option>
+                              <option value="o365">Office 365</option>
+                            </select>
+                          </div>
+                        </div>
+                        <div class="col-sm-5">
+                          <div class="form-group">
+                            <label>Payload</label>
+                            <select name="payload-template" class="form-control">
+                              <option value="empyre">Empyre/Empire</option>
+                              <option value="cobalt-strike">Cobalt Strike</option>
+                              <option value="powershell-script">Custom Powershell Script</option>
+                              <option value="netcat-payload">Netcat Callback</option>
+                            </select>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="tab-pane" id="payload-info">
+                      <h4 class="info-text">Configure Payload</h4>
+                      <div class="row">
+                        <div class="col-sm-5 col-sm-offset-1">
+                          <div class="form-group">
+                            <label>Callback Address</label>
+                            <input name="cb_payload" type="text" placeholder="URL for the Payload to Callback" class="form-control">
+                          </div>
+                        </div>
+                        <div class="col-sm-5">
+                          <div class="form-group">
+                            <label>Callback Port</label>
+                            <input name="cb_port_payload" placeholder="443" value="443" class="form-control">
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                    <div class="wizard-footer height-wizard">
+                      <div class="pull-right">
+                        <input type='button' class='btn btn-next btn-fill btn-info btn-wd btn-sm' name='next' id='next' value='Next' />
+                        <input type='submit' class='btn btn-finish btn-fill btn-info btn-wd btn-sm' name='finish' id='finish' value='Finish' />
+                      </div>
+                      <div class="pull-left">
+                        <input type='button' class='btn btn-previous btn-fill btn-default btn-wd btn-sm' name='previous' value='Previous' />
+                      </div>
+                      <div class="clearfix"></div>
+                  </div>
+                </div>
+             </form>
+           </div>
+         </div> <!-- wizard container -->
+       </div> <!--  big container -->
+     </div<!-- End Modal -->
+              </div>
+            </div>
+            <div class="box-body">
+              <table id="payload-mgmt-table" class="display nowrap" cellspacing="0" width="100%">
+                <thead>
+                <tr>
+                  <th></th>
+                  <th>Payload ID</th>
+                  <th>Callback Domain</th>
+                  <th>Callback Port</th>
+                  <th>Payload</th>
+                  <th>Status</th>
+                  <th>Modify</th>
+                </tr>
+                </thead>
+                <tbody>
+                  <tr data-child-value="properties_1">
+                    <td class="payload-detail-control"></td>
+                    <td>0001</td>
+                    <td>mydomain</td>
+                    <td>443</td>
+                    <td>Empyre 2.0</td>
+                    <td><input name="payload-status" type="checkbox" checked data-toggle="toggle" id="toggle-id" data-on="Enabled" data-off="Disabled" data-size="small"></td>
+                    <td>
+                       <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Remove</button>
+                    </td>
+                  </tr>
+                </tbody>
+                <tfoot>
+                <tr>
+                  <th></th>
+                  <th>Payload ID</th>
+                  <th>Callback Domain</th>
+		  <th>Callback Port</th>
+		  <th>Payload</th>
+                  <th>Status</th>
+                  <th>Modify</th>
+                </tr>
+                </tfoot>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
 {% endblock %}
 
 {% block footer %}
-   <script src="static/js/page.assets.min.js"></script>
-   <script src="static/js/jquery.dataTables.min.js"></script>
-   <script src="static/js/dataTables.bootstrap.min.js"></script>
-   <script src="static/js/dataTables.responsive.min.js"></script>
+
+<script src="static/js/jquery.dataTables.min.js"></script>
+<script src="static/js/dataTables.bootstrap.min.js"></script>
+<script src="static/js/bootstrap-toggle.min.js"></script>
+<script src="static/js/page.payload-manager.min.js"></script>
+<script src="static/js/jquery.bootstrap.wizard.js"></script>
+<script src="static/js/wizard.min.js"></script>
+<script src="static/js/jquery.validate.min.js"></script>
+<script src="static/js/dataTables.responsive.min.js"></script>
 {% endblock %}
