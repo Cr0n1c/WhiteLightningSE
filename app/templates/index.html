@@ -11,7 +11,7 @@
 		<div class="inner">
 		  <h3>150</h3>
 
-		  <p>Agents Deployed</p>
+		  <p>Sessions Hooked</p>
 		</div>
 		<div class="icon">
 		  <i class="ion ion-android-checkmark-circle"></i>
@@ -26,7 +26,7 @@
 		<div class="inner">
 		  <h3>83<sup style="font-size: 20px">%</sup></h3>
 
-		  <p>Compliant Devices</p>
+		  <p>Infection Success Rate</p>
 		</div>
 		<div class="icon">
 		  <i class="ion ion-stats-bars"></i>
@@ -41,7 +41,7 @@
 		<div class="inner">
 		  <h3>440</h3>
 
-		  <p>Descovered Devices</p>
+		  <p>Active Campaigns</p>
 		</div>
 		<div class="icon">
 		  <i class="ion ion-network"></i>
@@ -94,19 +94,19 @@
 				<div class="description-block margin-bottom">
 				  <div class="sparkbar pad" data-color="#fff">90,70,90,70,75,80,70</div>
 				  <h5 class="description-header">37</h5>
-				  <span class="description-text">New Devices Detected</span>
+				  <span class="description-text">Hits Per Day</span>
 				</div>
 				<!-- /.description-block -->
 				<div class="description-block margin-bottom">
 				  <div class="sparkbar pad" data-color="#fff">90,50,90,70,61,83,63</div>
 				  <h5 class="description-header">94%</h5>
-				  <span class="description-text">Average Load</span>
+				  <span class="description-text">Infections Per Day</span>
 				</div>
 				<!-- /.description-block -->
 				<div class="description-block">
 				  <div class="sparkbar pad" data-color="#fff">90,50,90,70,61,83,63</div>
 				  <h5 class="description-header">250</h5>
-				  <span class="description-text">Average Alerts</span>
+				  <span class="description-text">Credentials Stolen Per Day</span>
 				</div>
 			  </div>
 			</div>
@@ -119,7 +119,7 @@
 	<div class="col-md-6">
 	  <div class="box box-info">
 		<div class="box-header with-border">
-		  <h3 class="box-title">Latest Remediations</h3>
+		  <h3 class="box-title">Latest Infections</h3>
 
 		  <div class="box-tools pull-right">
 			<button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
@@ -133,62 +133,36 @@
 			<table class="table no-margin">
 			  <thead>
 			  <tr>
-				<th>Alert ID</th>
-				<th>Description</th>
-				<th>Status</th>
-				<th>Action Type</th>
-				<th>Remediation Time</th>
+				<th>Hostname</th>
+                                <th>IP Address</th>
+				<th>Payload</th>
+				<th>Infection Time</th>
 			  </tr>
 			  </thead>
 			  <tbody>
 			  <tr>
-				<td><a href="pages/examples/invoice.html">OR9842</a></td>
-				<td>Busybox uploaded to device</td>
-				<td><span class="label label-danger">Quarantined</span></td>
-				<td><span class="label label-success">Automated</span></td>
+				<td>windows-server-02</td>
+                                <td>24.123.12.1</td>
+				<td><span class="label label-danger">Empire</span></td>
 				<td>2 mins</td>
 			  </tr>
 			  <tr>
-				<td><a href="pages/examples/invoice.html">OR1848</a></td>
-				<td>Brute Force Login Attempts</td>
-				<td><span class="label label-warning">Blacklisted IP</span></td>
-				<td><span class="label label-success">Automated</span></td>
+				<td>brandons-mbp</td>
+                                <td>24.123.12.14</td>
+				<td><span class="label label-warning">Empyre</span></td>
 				<td>5 mins</td>
 			  </tr>
 			  <tr>
-				<td><a href="pages/examples/invoice.html">OR9842</a></td>
-				<td>New network detected</td>
-				<td><span class="label label-info">Informational</span></td>
-				<td><span class="label label-success">Automated</span></td>
+				<td>daniels-ubuntu</td>
+                                <td>12.24.36.48</td>
+				<td><span class="label label-info">Netcat</span></td>
 				<td>10 mins</td>
 			  </tr>
 			  <tr>
-				<td><a href="pages/examples/invoice.html">OR7429</a></td>
-				<td>Malicious user activity</td> 
-				<td><span class="label label-danger">Quarantined</span></td>
-				<td><span class="label label-warning">Manual</span></td>
-				<td>1 Day</td>
-			  </tr>
-			  <tr>
-				<td><a href="pages/examples/invoice.html">OR1848</a></td>
-				<td>Detected outdated firmware</td>
-				<td><span class="label label-success">Updated</span></td>
-				<td><span class="label label-success">Automated</span></td>
-				<td>1 Day</td>
-			  </tr>
-			  <tr>
-				<td><a href="pages/examples/invoice.html">OR7429</a></td>
-				<td>Detected outdated firmware</td>
-				<td><span class="label label-success">Updated</span></td>
-				<td><span class="label label-success">Automated</span></td>
-				<td>1 Day</td>
-			  </tr>
-			  <tr>
-				<td><a href="pages/examples/invoice.html">OR9842</a></td>
-				<td>Service created unknown outbound connection</td>
-				<td><span class="label label-info">Benign</span></td>
-				<td><span class="label label-warning">Manual</span></td>
-				<td>1 Hour</td>
+				<td>user-pc</td>
+                                <td>83.122.4.21</td> 
+				<td><span class="label label-danger">Empire</span></td>
+				<td>1 hour</td>
 			  </tr>
 			  </tbody>
 			</table>
@@ -203,7 +177,7 @@
 	<div class="col-md-6">
 	  <div class="box box-danger">
 		<div class="box-header with-border">
-		  <h3 class="box-title">Longest Active Alerts</h3>
+		  <h3 class="box-title">Latest Attempts</h3>
 
 		  <div class="box-tools pull-right">
 			<button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
@@ -217,61 +191,32 @@
 			<table class="table no-margin">
 			  <thead>
 			  <tr>
-				<th>Alert ID</th>
-				<th>Description</th>
-				<th>Status</th>
-				<th>Age</th>
+				<th>IP Address</th>
+				<th>User Agent String</th>
+                                <th>Site</th>
+				<th>Phase</th>
+                                <th>Age</th>
 			  </tr>
 			  </thead>
 			  <tbody>
 			  <tr>
-				<td><a href="pages/examples/invoice.html">OR9772</a></td>
-				<td>Malicious user activity</td>
-				<td><span class="label label-danger">Unknown</span></td>
-				<td>3 Weeks</td>
+				<td>12.24.22.1</td>
+                                <td>Some User Agent</td>
+				<td><span class="label label-info">/exploit-site-1</span></td>
+				<td>3 mins</td>
 			  </tr>
 			  <tr>
-				<td><a href="pages/examples/invoice.html">OR2248</a></td>
-				<td>Apache Struts vulnerability detected</td>
-				<td><span class="label label-warning">Assigned</span></td>
-				<td>3 Weeks</td>
-			  </tr>
-			  <tr>
-				<td><a href="pages/examples/invoice.html">OR2456</a></td>
-				<td>EOL System connected to network</td>
-				<td><span class="label label-danger">Unknown</span></td>
-				<td>15 Days</td>
-			  </tr>
-			  <tr>
-				<td><a href="pages/examples/invoice.html">OR8374</a></td>
-				<td>Lost communications with endpoint</td> 
-				<td><span class="label label-warning">Assigned</span></td>
-				<td>10 Days</td>
-			  </tr>
-			  <tr>
-				<td><a href="pages/examples/invoice.html">OR1900</a></td>
-				<td>Critical file modified. /etc/passwd</td>
-				<td><span class="label label-warning">Assigned</span></td>
-				<td>9 Days</td>
-			  </tr>
-			  <tr>
-				<td><a href="pages/examples/invoice.html">OR6654</a></td>
-				<td>Detected new service with listener on TCP 4444</td>
-				<td><span class="label label-warning">Assigned</span></td>
-				<td>5 Days</td>
-			  </tr>
-			  <tr>
-				<td><a href="pages/examples/invoice.html">OR0998</a></td>
-				<td>Maximum connections on device.</td>
-				<td><span class="label label-danger">Unknown</span></td>
-				<td>5 Days</td>
+				<td>173.14.4.42</td>
+                                <td>Some other UA</td>
+				<td><span class="label label-danger">/robots.txt</span></td>
+				<td>4 mins</td>
 			  </tr>
 			  </tbody>
 			</table>
 		  </div>
 		</div>
 		<div class="box-footer clearfix">
-		  <a href="javascript:void(0)" class="btn btn-sm btn-info btn-flat pull-right">View All Active Alerts</a>
+		  <a href="javascript:void(0)" class="btn btn-sm btn-info btn-flat pull-right">View All Logs</a>
 		</div>
 	  </div>
 	</div>
