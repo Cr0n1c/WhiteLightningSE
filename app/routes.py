@@ -39,7 +39,7 @@ def updatePage(current_title, current_url):
 
 #Reading in config
 parser = SafeConfigParser()
-with open('../conf/whitelightning.conf') as f:
+with open(os.path.join(os.getcwd(),"..", "conf", "whitelightning.conf")) as f:
     parser.readfp(f)
 
 #csrf = CSRFProtect()
