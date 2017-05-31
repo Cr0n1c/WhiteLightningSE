@@ -3,8 +3,13 @@ import json
 import os                   
 import kore                 
                             
+from ConfigParser import SafeConfigParser
 from flask import Flask, render_template, redirect, url_for, request, session  
-                       
+from flask_wtf import RecaptchaField, FlaskForm
+from wtforms import StringField, PasswordField
+from wtforms.validators import InputRequired, Length, AnyOf
+from flask_wtf.csrf import CSRFProtect
+
 #########[ GLOBAL PARAMS ]#################                        
 DEBUG = True                
 SRVHOST = '0.0.0.0'         
@@ -30,10 +35,23 @@ def updatePage(current_title, current_url):
     session['current_url'] = current_url
     session['current_title'] = current_title
                        
-#########[ APP STARTUP ]###################                        
-app = Flask(__name__)       
-                            
+#########[ APP STARTUP ]###################
+
+#Reading in config
+parser = SafeConfigParser()
+with open(os.path.join(os.getcwd(),"..", "conf", "whitelightning.conf")) as f:
+    parser.readfp(f)
+
+#csrf = CSRFProtect()
+      
+app = Flask(__name__)
+#csrf.init_app(app)
+       
+app.config['RECAPTCHA_PUBLIC_KEY'] = parser.get('recaptcha', 'site_key')
+app.config['RECAPTCHA_PRIVATE_KEY'] = parser.get('recaptcha', 'secret_key')
+app.config['RECAPTCHA_DATA_ATTRS'] = {'size': 'compact'}                           
 ########[ WEB PAGES ]#####################                         
+
 @app.route('/')             
 @app.route('/home')         
 @app.route('/index')        
@@ -41,52 +59,22 @@ def home():
     updatePage("home", "index.html")                                
     return loginCheck()
 
+class LoginForm(FlaskForm):
+    username = StringField('username', validators=[InputRequired('A username is required!'), Length(min=7, max=15, message='Invalid Username')], render_kw={"placeholder": "Username"})
+    password = PasswordField('password', validators=[InputRequired('Password is required!')], render_kw={"placeholder": "Password"})
+    recaptcha = RecaptchaField()
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    global users
-    error = { 'code'   : None,
-              'message': None
-            }
+    form = LoginForm()
 
-    if request.method == 'POST':
-        try:
-            username = request.form['username'].lower()
-            password = request.form['password']
-        except KeyError:
-            error['code'] = 2 #User is bypassing the UX
-            error['message'] = "Malicious login attempt"
-        else:
-            if users.get(username) is None:
-                error['code'] = 3 #User does not exists
-                error['message'] = "Invalid Creds"
-            else:
-                error['message'] = kore.neo4j.userLogin(username, password, db)
-                if error['message'] and users[username]:
-                    try:
-                        users[username]['login_atttempt'] += 1
-                    except KeyError:
-                        users[username]['login_attempt'] = 1
-                        error['code'] = 4 #Failed login
-                    else:
-                        if users[username]['login_attempt'] > 2:
-                             error['code'] = 5 #Force reCaptcha
-                        else:
-                             error['code'] = 4 #Failed login
-
-        if error['code'] is None:
-            session['username'] = username
-            session['logged_in'] = True
-            session['login_attempt'] = 0
-            session['sidebar_collapse'] = False
-            return redirect(url_for('home'))
-        else:
-            print error
-            return render_template('login.html', error=error)
-    elif request.method == 'GET':
-        if session.get('logged_in'):
-            return redirect(url_for('home'))
-        else:
-            return render_template('login.html', error=error)
+    if form.validate_on_submit() and users[form.username.data] and kore.neo4j.userLogin(form.username.data, form.password.data, db) is None:
+        session['username'] = form.username.data
+        session['logged_in'] = True
+        session['sidebar_collapse'] = False
+        return redirect(url_for('home'))
+    else:
+        return render_template('login.html', form=form)
 
 @app.route('/logout')
 def logout():

@@ -1,3 +1,4 @@
+import os
 import py2neo
 import re
 
@@ -10,8 +11,7 @@ except ImportError:
 
 #Reading from config file
 parser = SafeConfigParser()
-#with open('../conf/whitelightning.conf') as f:
-with open('/var/www/WhiteLightningSE/conf/whitelightning.conf') as f:
+with open(os.path.join(os.getcwd(), "..", "conf", "whitelightning.conf")) as f:
     parser.readfp(f)
 
 DB_SERVER   = parser.get('database', 'url')
