@@ -1,5 +1,5 @@
-{% extends "header.html" %}  
 {% block header %}
+<script src="static/js/jquery-2.2.4.min.js"></script>
 <link rel="stylesheet" href="static/css/jquery-jvectormap-1.2.2.css">
 <link href="static/css/jquery.terminal.css" rel="stylesheet"/>
 {% endblock %}
@@ -19,17 +19,32 @@
 jQuery(function($, undefined) {
     $('#jsterm').terminal(function(command) {
         if (command !== '') {
-            var result = window.eval(command);
-            if (result != undefined) {
-                this.echo(String(result));
-            }
+            var result = $.ajax({
+                            //url:"/terminal",
+                            context:this,
+                            method:"POST",
+                            data:JSON.stringify({"command":command})})
+                          .done(function(msg) { 
+                            msg = JSON.parse(msg);
+                            var suc = msg['success'];
+                            var data = "[!] Error: ";
+                            if (suc == true) {
+                                data = msg['message'];
+                            } else {
+                                data += msg['message'];
+                            }
+                            this.echo(String(data));
+                            })
+            //if (result != undefined) {
+            //    this.echo(String(result));
+            //}
         }
     }, {
-        greetings: 'Javascript Interpreter',
-        name: 'js_demo',
+        greetings: 'WhiteLightning - Interactive Shell',
+        name: 'wl_shell',
         width: '100%',
         height: '100%',
-        prompt: 'js> '
+        prompt: 'wl> '
     });
 });
 </script>

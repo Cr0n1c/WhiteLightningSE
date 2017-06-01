@@ -1,15 +1,16 @@
 #!/usr/bin/python           
 import json                 
 import os                   
-import kore                 
-                            
+import kore
+from kore.empirerpc import EmpireRpc
+                           
 from flask import Flask, render_template, redirect, url_for, request, session  
                        
 #########[ GLOBAL PARAMS ]#################                        
 DEBUG = True                
-SRVHOST = '0.0.0.0'         
-SRVPORT = 80                
-                            
+SRVHOST = '0.0.0.0'
+SRVPORT = 8001
+         
 #########[ BASIC MODULES ]#################                        
 def loginCheck(**kwargs):
     if not session.get('logged_in'):
@@ -139,6 +140,18 @@ def assetTracking():
 @app.route('/asset-discovery')
 def assetDiscovery():
     updatePage("assetDiscovery", "asset-discovery.html")
+    return loginCheck()
+
+@app.route('/terminal',methods=['GET','POST'])
+def handleTerminal():
+    if request.method == 'POST' and session.get('logged_in') and request.args.get('id') is not None:
+        command = request.get_json(force=True,silent=True)
+        print "command: {}".format(command.get('command'))
+        print request.args.get('id')
+        empirerpc = EmpireRpc(agent_name=request.args.get('id'))
+        retval = empirerpc.handle_command(command.get('command','help'))
+        return json.dumps({'success':True,'message':retval}), 200, {'ContentType':'application/json'}
+    updatePage("terminal", "terminal.html")
     return loginCheck()
 
 ###############[ ERROR HANDLING ]########################
