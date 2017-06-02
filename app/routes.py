@@ -5,9 +5,6 @@ import kore
                             
 from ConfigParser import SafeConfigParser
 from flask import Flask, render_template, redirect, url_for, request, session  
-from flask_wtf import RecaptchaField, FlaskForm
-from wtforms import StringField, PasswordField
-from wtforms.validators import InputRequired, Length, AnyOf
 from flask_wtf.csrf import CSRFProtect
 
 #########[ GLOBAL PARAMS ]#################                        
@@ -20,7 +17,11 @@ def loginCheck(**kwargs):
     if not session.get('logged_in'):
         return redirect(url_for('login'))
     else:
-        return render_template(session.get('current_url'), user=users[session.get('username')], **kwargs)
+        return render_template(
+                session.get('current_url'), 
+                             user=users[session.get('username')], 
+                             **kwargs
+                )
 
 def updatePage(current_title, current_url):
     if current_url == session.get('current_url'):
@@ -34,7 +35,7 @@ def updatePage(current_title, current_url):
     session['previous_title'] = session.get('current_title')
     session['current_url'] = current_url
     session['current_title'] = current_title
-                       
+
 #########[ APP STARTUP ]###################
 
 #Reading in config
@@ -42,10 +43,10 @@ parser = SafeConfigParser()
 with open(os.path.join(os.getcwd(),"..", "conf", "whitelightning.conf")) as f:
     parser.readfp(f)
 
-#csrf = CSRFProtect()
+csrf = CSRFProtect()
       
 app = Flask(__name__)
-#csrf.init_app(app)
+csrf.init_app(app)
        
 app.config['RECAPTCHA_PUBLIC_KEY'] = parser.get('recaptcha', 'site_key')
 app.config['RECAPTCHA_PRIVATE_KEY'] = parser.get('recaptcha', 'secret_key')
@@ -59,16 +60,15 @@ def home():
     updatePage("home", "index.html")                                
     return loginCheck()
 
-class LoginForm(FlaskForm):
-    username = StringField('username', validators=[InputRequired('A username is required!'), Length(min=7, max=15, message='Invalid Username')], render_kw={"placeholder": "Username"})
-    password = PasswordField('password', validators=[InputRequired('Password is required!')], render_kw={"placeholder": "Password"})
-    recaptcha = RecaptchaField()
-
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    form = LoginForm()
+    if len(users) == 0:
+        return redirect(url_for('first_run'))
 
-    if form.validate_on_submit() and users[form.username.data] and kore.neo4j.userLogin(form.username.data, form.password.data, db) is None:
+    form = kore.templateLogin.LoginForm()
+
+    if form.validate_on_submit() and users[form.username.data] and \
+       kore.neo4j.userLogin(form.username.data, form.password.data, db) is None:
         session['username'] = form.username.data
         session['logged_in'] = True
         session['sidebar_collapse'] = False
@@ -80,6 +80,14 @@ def login():
 def logout():
     session.clear()
     return redirect(url_for('login'))
+
+@app.route('/first-run')
+def firstRun():
+    if not users:
+        #if len(users) > 0:
+        return redirect(url_for('home'))
+    else: 
+        return render_template('first-run.html')
 
 @app.route('/user-control-panel', methods=['GET', 'POST'])
 def userControlPanel():
@@ -103,7 +111,12 @@ def userControlPanel():
 def updateUserRole():
     status = True
     if session['logged_in'] and users[session['username']]['is_admin']:
-        status = kore.templateUserControlPanel.updateUserRole(db, request.form['name'], request.form['property'], request.form['value'])
+        status = kore.templateUserControlPanel.updateUserRole(
+            db, 
+            request.form['name'], 
+            request.form['property'], 
+            request.form['value']
+        )
     else:
         print "something is going horrible"
 
