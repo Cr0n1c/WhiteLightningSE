@@ -10,8 +10,8 @@ class UserControlPanelPage(object):
 
     def queryAllUser(self):
         user_list = []
-        query_string = "MATCH (u:_USER) return u.firstName, u.lastName, u.username, u.email, " \
-                       "u.country, u.isEng, u.isDev, u.isAdmin"
+        query_string = "MATCH (u:_USER) return u.firstName, u.lastName, u.username, "\
+                       "u.email, u.country, u.isEng, u.isDev, u.isAdmin"
 
         unique_id = 0
         for res in self.db.queryAll(query_string):
@@ -51,10 +51,12 @@ class UserControlPanelPage(object):
     def toggleStatus(self, username, field_to_update, current_status):
         new_status = flipStatus(current_status)
 
-        if new_staus is None or not setUsername(username) or field_to_update not in ['isAdmin', 'isEng', 'isDev']:
+        if new_staus is None or not setUsername(username) or \
+          field_to_update not in ['isAdmin', 'isEng', 'isDev']:
             return False
 
-        self.db.query("MERGE (u:_USER {username: '%s'}) set u.%s = %s" %(username, field_to_update, current_status))
+        self.db.query("MERGE (u:_USER {username: '%s'}) set u.%s = %s" %
+            (username, field_to_update, current_status))
 
 def updateUserRole(db, user, prop, value):
     prop_dic = { 'admin' : 'isAdmin',
@@ -65,5 +67,6 @@ def updateUserRole(db, user, prop, value):
     if not prop in prop_dic.keys() or not value in ['true', 'false']:
         return False
 
-    db.queryAll("MATCH (u:_USER {username: '%s'}) set u.%s = %s" %(user, prop_dic[prop], value))
+    db.queryAll("MATCH (u:_USER {username: '%s'}) set u.%s = %s" %
+        (user, prop_dic[prop], value))
     return True
