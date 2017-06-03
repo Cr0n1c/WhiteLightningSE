@@ -5,9 +5,6 @@ import kore
                             
 from ConfigParser import SafeConfigParser
 from flask import Flask, render_template, redirect, url_for, request, session  
-from flask_wtf import RecaptchaField, FlaskForm
-from wtforms import StringField, PasswordField
-from wtforms.validators import InputRequired, Length, AnyOf
 from flask_wtf.csrf import CSRFProtect
 
 #########[ GLOBAL PARAMS ]#################                        
@@ -20,7 +17,11 @@ def loginCheck(**kwargs):
     if not session.get('logged_in'):
         return redirect(url_for('login'))
     else:
-        return render_template(session.get('current_url'), user=users[session.get('username')], **kwargs)
+        return render_template(
+                session.get('current_url'), 
+                             user=users[session.get('username')], 
+                             **kwargs
+                )
 
 def updatePage(current_title, current_url):
     if current_url == session.get('current_url'):
@@ -34,18 +35,24 @@ def updatePage(current_title, current_url):
     session['previous_title'] = session.get('current_title')
     session['current_url'] = current_url
     session['current_title'] = current_title
-                       
+
 #########[ APP STARTUP ]###################
 
 #Reading in config
 parser = SafeConfigParser()
-with open(os.path.join(os.getcwd(),"..", "conf", "whitelightning.conf")) as f:
-    parser.readfp(f)
 
-#csrf = CSRFProtect()
+try:
+    with open(os.path.join(os.getcwd(),"..", "conf", "whitelightning.conf")) as f:
+        parser.readfp(f)
+except IOError:
+    initial_run = True
+else:
+    initial_run = False
+
+csrf = CSRFProtect()
       
 app = Flask(__name__)
-#csrf.init_app(app)
+csrf.init_app(app)
        
 app.config['RECAPTCHA_PUBLIC_KEY'] = parser.get('recaptcha', 'site_key')
 app.config['RECAPTCHA_PRIVATE_KEY'] = parser.get('recaptcha', 'secret_key')
@@ -59,16 +66,12 @@ def home():
     updatePage("home", "index.html")                                
     return loginCheck()
 
-class LoginForm(FlaskForm):
-    username = StringField('username', validators=[InputRequired('A username is required!'), Length(min=7, max=15, message='Invalid Username')], render_kw={"placeholder": "Username"})
-    password = PasswordField('password', validators=[InputRequired('Password is required!')], render_kw={"placeholder": "Password"})
-    recaptcha = RecaptchaField()
-
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    form = LoginForm()
+    form = kore.templateLogin.LoginForm()
 
-    if form.validate_on_submit() and users[form.username.data] and kore.neo4j.userLogin(form.username.data, form.password.data, db) is None:
+    if form.validate_on_submit() and users[form.username.data] and \
+       kore.neo4j.userLogin(form.username.data, form.password.data, db) is None:
         session['username'] = form.username.data
         session['logged_in'] = True
         session['sidebar_collapse'] = False
@@ -80,6 +83,21 @@ def login():
 def logout():
     session.clear()
     return redirect(url_for('login'))
+
+@app.route('/first-run', methods=['GET', 'POST'])
+def firstRun():
+    global initial_run
+    
+    #DEBUG, change back to this when ready: if not initial_run:
+    if initial_run:
+        return redirect(url_for('home'))
+    
+    if request.method == 'POST':
+        status = kore.firstRun(request.form)
+        if status[1] == 200:
+            initial_run = False #This tells us that we have successfully configured the server
+    else: 
+        return render_template('first-run.html')
 
 @app.route('/user-control-panel', methods=['GET', 'POST'])
 def userControlPanel():
@@ -103,15 +121,16 @@ def userControlPanel():
 def updateUserRole():
     status = True
     if session['logged_in'] and users[session['username']]['is_admin']:
-        status = kore.templateUserControlPanel.updateUserRole(db, request.form['name'], request.form['property'], request.form['value'])
-    else:
-        print "something is going horrible"
+        status = kore.templateUserControlPanel.updateUserRole(
+            db, 
+            request.form['name'], 
+            request.form['property'], 
+            request.form['value']
+        )
 
     if status:
-        print "status is good"
         return json.dumps({'success':True}), 200, {'ContentType':'application/json'}
     else:
-        print "statis is no good"
         return json.dumps({'success':False}), 401, {'ContentType':'application/json'}
 
 @app.route('/user-profile')
@@ -135,6 +154,9 @@ def error():
     pass
 
 if __name__ == '__main__':
+    while initial_run:
+        redirect(to_url('first-run'))
+
     users = kore.neo4j.getAllUsers()
     db = kore.neo4j.Initialize()
     app.secret_key = os.urandom(24)
