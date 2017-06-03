@@ -34,6 +34,7 @@
               <ul>
                 <li><a href="#database-setup" data-toggle="tab">Database Setup</a></li>
                 <li><a href="#first-user-setup" data-toggle="tab">First User Setup</a></li>
+                <li><a href="#rat-setup" data-toggle="tab">Infection Setup</a></li>
                 <li><a href="#web-site-setup" data-toggle="tab">Web Site Setup</a></li>
               </ul>
             </div>
@@ -97,6 +98,47 @@
                       <div class="form-group">
                         <label>Confirm Password</label>
                         <input name="uivalidatepw" id="uivalidatepw" type="password" class="form-control">
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <br><br>
+              </div>
+              <div class="tab-pane" id="rat-setup">
+                <h4 class="info-text">Let's setup our RATs</h4>
+                <div class="row">
+                  <div class="row">
+                    <div class="col-sm-7 col-sm-offset-1">
+                      <div class="form-group">
+                       <label>Empire Server</label>
+                       <input name="empireserver" id="empireserver" type="text" class="form-control" placeholder="127.0.0.1" value="127.0.0.1">
+                      </div>
+                    </div>
+                    <div class="col-sm-3">
+                      <label>Empire API Port</label>
+                      <input name="empireport" id="empireport" type="text" class="form-control" placeholder="8888" value="8888">
+                    </div>
+                  </div>
+                  <br><br>
+                  <div class="row">
+                    <div class="col-sm-5 col-sm-offset-1">
+                      <div class="form-group">
+                       <label>Empire Username</label>
+                       <input name="empireusername" id="empireusername" type="text" class="form-control">
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="col-sm-5 col-sm-offset-1">
+                      <div class="form-group">
+                        <label>Password</label>
+                        <input name="empirepassword" id="empirepassword" type="password" class="form-control">
+                      </div>
+                    </div>
+                    <div class="col-sm-5">
+                      <div class="form-group">
+                        <label>Confirm Password</label>
+                        <input name="empirevalidatepw" id="empirevalidatepw" type="password" class="form-control">
                       </div>
                     </div>
                   </div>

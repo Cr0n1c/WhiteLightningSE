@@ -40,8 +40,14 @@ def updatePage(current_title, current_url):
 
 #Reading in config
 parser = SafeConfigParser()
-with open(os.path.join(os.getcwd(),"..", "conf", "whitelightning.conf")) as f:
-    parser.readfp(f)
+
+try:
+    with open(os.path.join(os.getcwd(),"..", "conf", "whitelightning.conf")) as f:
+        parser.readfp(f)
+except IOError:
+    initial_run = True
+else:
+    initial_run = False
 
 csrf = CSRFProtect()
       
@@ -62,9 +68,6 @@ def home():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    if len(users) == 0:
-        return redirect(url_for('first_run'))
-
     form = kore.templateLogin.LoginForm()
 
     if form.validate_on_submit() and users[form.username.data] and \
@@ -81,11 +84,18 @@ def logout():
     session.clear()
     return redirect(url_for('login'))
 
-@app.route('/first-run')
+@app.route('/first-run', methods=['GET', 'POST'])
 def firstRun():
-    if not users:
-        #if len(users) > 0:
+    global initial_run
+    
+    #DEBUG, change back to this when ready: if not initial_run:
+    if initial_run:
         return redirect(url_for('home'))
+    
+    if request.method == 'POST':
+        status = kore.firstRun(request.form)
+        if status[1] == 200:
+            initial_run = False #This tells us that we have successfully configured the server
     else: 
         return render_template('first-run.html')
 
@@ -117,14 +127,10 @@ def updateUserRole():
             request.form['property'], 
             request.form['value']
         )
-    else:
-        print "something is going horrible"
 
     if status:
-        print "status is good"
         return json.dumps({'success':True}), 200, {'ContentType':'application/json'}
     else:
-        print "statis is no good"
         return json.dumps({'success':False}), 401, {'ContentType':'application/json'}
 
 @app.route('/user-profile')
@@ -148,6 +154,9 @@ def error():
     pass
 
 if __name__ == '__main__':
+    while initial_run:
+        redirect(to_url('first-run'))
+
     users = kore.neo4j.getAllUsers()
     db = kore.neo4j.Initialize()
     app.secret_key = os.urandom(24)
