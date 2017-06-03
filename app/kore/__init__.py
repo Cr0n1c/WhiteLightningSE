@@ -17,26 +17,25 @@ requests.packages.urllib3.disable_warnings()
 
 def firstRun(request_form):
     try:
-        db_server = request_form["dbserver"]
-        db_username = request_form["dbusername"]
+        db_server, none = validateServer(request_form["dbserver"], None, "neo4j")
+        db_username = userUtils.setUser(request_form["dbusername"])
         db_password = request_form["dbpassword"]
             
-        ui_username = request_form["uiusername"]
-        ui_password = request_form["uipassword"]
+        ui_username = userUtils.setUser(request_form["uiusername"])
+        ui_password = userUtils.setPassword(ui_username, request_form["uipassword"])
 
-        empire_server = request_form["empireserver"]
-        empire_port = request_form["empireport"]
-        empire_username = request_form["empireusername"]
-        empire_password = request_form["empirepassword"]
+        (empire_server, empire_port) = validateServer(request_form["empireserver"], request_form["empireport"])
+        empire_username = userUtils.setUser(request_form["empireusername"])
+        empire_password = userUtils.setPassword(None, request_form["empirepassword"], False)
 
-        recaptcha_site_key = request_form["recaptchasite"]
-        recaptcha_secret_key = request_form["recaptchasecret"]
+        recaptcha_site_key = validateReCaptcha(request_form["recaptchasite"])
+        recaptcha_secret_key = validateReCaptcha(request_form["recaptchasecret"])
     except KeyError:    
         return json.dumps({'success': False}), 401, {'ContentType': 'application/json'}
     
-    if validateServer(db_server, None, "neo4j") and validateUser(db_username) and validatePass(db_password) and \
-       validateServer(empire_server, empire_port) and validateUser(empire_username) and validatePass(empire_password) \
-       and validateUser(ui_username) and validatePass(ui_password) \
+    if validateServer(db_server, None, "neo4j") and userUtils.setUsername(db_username) and validatePass(db_password) and \
+       validateServer(empire_server, empire_port) and userUtils.setUsername(empire_username) and validatePass(empire_password) \
+       and ui_username and ui_password \
        and validateReCaptcha(recaptcha_site_key, recaptcha_secret_key):
         pass
     else: 
@@ -128,11 +127,15 @@ def createNewUser(request_form, db):
     else:
         return "Failed to create user account"
 
-def validateUser(username):
-    return True
 
 def validateServer(host, port, db=None):
-    return True
+    if port:
+        if re.match("^([0-9]{1,4}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])$", port): 
+            return True, True
+        else:
+            return True, False
+    else:
+        return True
 
-def validateReCaptcha(site_str, secret_str):
+def validateReCaptcha(string):
     return True
