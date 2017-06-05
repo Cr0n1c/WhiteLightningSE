@@ -1,8 +1,7 @@
 import os
-import py2neo
-import re
-
 from ConfigParser import SafeConfigParser
+
+import py2neo
 
 try:
     import userUtils
