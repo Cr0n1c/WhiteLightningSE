@@ -33,6 +33,9 @@ def updatePage(current_title, current_url):
                        
 #########[ APP STARTUP ]###################                        
 app = Flask(__name__)       
+
+# Setup EmpireRPC
+empirerpc = EmpireRpc('104.236.48.159',23698,username='empirerpc',password='test123test!@#')
                             
 ########[ WEB PAGES ]#####################                         
 @app.route('/')             
@@ -146,11 +149,18 @@ def assetDiscovery():
 def handleTerminal():
     if request.method == 'POST' and session.get('logged_in') and request.args.get('id') is not None:
         command = request.get_json(force=True,silent=True)
-        print "command: {}".format(command.get('command'))
-        print request.args.get('id')
-        empirerpc = EmpireRpc(agent_name=request.args.get('id'))
-        retval = empirerpc.handle_command(command.get('command','help'))
-        return json.dumps({'success':True,'message':retval}), 200, {'ContentType':'application/json'}
+        agent_name = request.args.get('id')
+        if empirerpc is None:
+            success = False
+            message = 'Unable to connect to Empire!'
+            status_code = 503
+        else:
+            retval = empirerpc.handle_command(command.get('command','help'),agent_name=agent_name)
+            success = retval.get('success',False)
+            message = retval.get('message',"Success!" if success else "Unknown Error!")
+            status_code = 200
+        return json.dumps({'success':success,'message':message}), status_code, {'ContentType':'application/json'}
+
     updatePage("terminal", "terminal.html")
     return loginCheck()
 
