@@ -6,11 +6,13 @@ import kore
 from ConfigParser import SafeConfigParser
 from flask import Flask, render_template, redirect, url_for, request, session  
 from flask_wtf.csrf import CSRFProtect
+from werkzeug.contrib.fixers import ProxyFix
 
 #########[ GLOBAL PARAMS ]#################                        
 DEBUG = True                
 SRVHOST = '0.0.0.0'         
-SRVPORT = 80                
+SRVPORT = 8080               
+
                             
 #########[ BASIC MODULES ]#################                        
 def loginCheck(**kwargs):
@@ -42,21 +44,26 @@ def updatePage(current_title, current_url):
 parser = SafeConfigParser()
 
 try:
-    with open(os.path.join(os.getcwd(),"..", "conf", "whitelightning.conf")) as f:
+    with open(os.path.join(os.path.dirname(os.path.abspath(__file__)),"..", "conf", "whitelightning.conf")) as f:
         parser.readfp(f)
 except IOError:
     initial_run = True
 else:
     initial_run = False
 
-csrf = CSRFProtect()
+#csrf = CSRFProtect()
       
 app = Flask(__name__)
-csrf.init_app(app)
+app.wsgi_app = ProxyFix(app.wsgi_app)
+#csrf.init_app(app)
        
 app.config['RECAPTCHA_PUBLIC_KEY'] = parser.get('recaptcha', 'site_key')
 app.config['RECAPTCHA_PRIVATE_KEY'] = parser.get('recaptcha', 'secret_key')
 app.config['RECAPTCHA_DATA_ATTRS'] = {'size': 'compact'}                           
+
+users = kore.neo4j.getAllUsers()
+db = kore.neo4j.Initialize()
+app.secret_key = os.urandom(24)
 ########[ WEB PAGES ]#####################                         
 
 @app.route('/')             
@@ -153,11 +160,9 @@ def assetDiscovery():
 def error():
     pass
 
-if __name__ == '__main__':
+
+if __name__ in  ['__main__', 'routes']:
     while initial_run:
         redirect(to_url('first-run'))
 
-    users = kore.neo4j.getAllUsers()
-    db = kore.neo4j.Initialize()
-    app.secret_key = os.urandom(24)
     app.run(host=SRVHOST, port=SRVPORT, debug=DEBUG)

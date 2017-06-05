@@ -11,7 +11,7 @@ except ImportError:
 
 #Reading from config file
 parser = SafeConfigParser()
-with open(os.path.join(os.getcwd(), "..", "conf", "whitelightning.conf")) as f:
+with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "conf", "whitelightning.conf")) as f:
     parser.readfp(f)
 
 DB_SERVER   = parser.get('database', 'url')
