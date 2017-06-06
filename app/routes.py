@@ -5,9 +5,7 @@ import kore
 from flask import Blueprint
 from flask import render_template, redirect, url_for, request, session
 
-
 routes = Blueprint('routes', __name__)
-
 
 # TODO (ecolq) AWFUL HACK: Remove these globals
 global db
@@ -18,12 +16,12 @@ def initialise_users_for_routes():
     global db
     global users
     db = kore.neo4j.Initialize()
-    users = kore.neo4j.getAllUsers()
+    users = kore.neo4j.get_all_users()
 
 
 def login_check(**kwargs):
     if not session.get('logged_in'):
-        return redirect(url_for('login'))
+        return redirect(url_for('routes.login'))
     else:
         return render_template(
             session.get('current_url'),
@@ -56,14 +54,14 @@ def home():
 
 @routes.route('/login', methods=['GET', 'POST'])
 def login():
-    form = kore.templateLogin.LoginForm()
+    form = kore.template_login.LoginForm()
 
-    if form.validate_on_submit() and users[form.username.data] and \
-                    kore.neo4j.userLogin(form.username.data, form.password.data, db) is None:
+    if form.validate_on_submit() and form.username.data in users and \
+            kore.neo4j.user_login(form.username.data, form.password.data, db) is None:
         session['username'] = form.username.data
         session['logged_in'] = True
         session['sidebar_collapse'] = False
-        return redirect(url_for('home'))
+        return redirect(url_for('routes.home'))
     else:
         return render_template('login.html', form=form)
 
@@ -71,21 +69,25 @@ def login():
 @routes.route('/logout')
 def logout():
     session.clear()
-    return redirect(url_for('login'))
+    return redirect(url_for('routes.login'))
 
 
 @routes.route('/first-run', methods=['GET', 'POST'])
 def first_run():
-    global initial_run
-
+    # global initial_run
+    #
+    # if initial_run is None:
+    #     initial_run = True
+    #
     # DEBUG, change back to this when ready: if not initial_run:
-    if initial_run:
-        return redirect(url_for('home'))
+    # if not initial_run:
+    #     return redirect(url_for('routes.home'))
 
     if request.method == 'POST':
-        status = kore.firstRun(request.form)
+        status = kore.first_run(request.form)
         if status[1] == 200:
-            initial_run = False  # This tells us that we have successfully configured the server
+            login()
+            # initial_run = False  # This tells us that we have successfully configured the server
     else:
         return render_template('first-run.html')
 
@@ -96,24 +98,24 @@ def user_control_panel():
 
     # registration piece
     if request.method == 'POST' and session.get('logged_in'):
-        status = kore.createNewUser(request.form, db)
+        status = kore.create_new_user(request.form, db)
         if status == "ok":
             return redirect(url_for(session['current_title']))
 
     try:
         if not users[session['username']]['is_admin']:
-            return redirect(url_for('error'))
+            return redirect(url_for('routes.error'))
     except KeyError:
         return login_check()
 
-    return login_check(ucp=kore.templateUserControlPanel.UserControlPanelPage(db))
+    return login_check(ucp=kore.template_user_control_panel.UserControlPanelPage(db))
 
 
 @routes.route('/update-user-role', methods=['POST'])
 def update_user_role():
     status = True
     if session['logged_in'] and users[session['username']]['is_admin']:
-        status = kore.templateUserControlPanel.updateUserRole(
+        status = kore.template_user_control_panel.update_user_role(
             db,
             request.form['name'],
             request.form['property'],
@@ -148,5 +150,3 @@ def asset_discovery():
 @routes.route('/error')
 def error():
     pass
-
-

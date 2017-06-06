@@ -4,6 +4,7 @@ from ConfigParser import SafeConfigParser
 
 from enum import Enum
 from flask import Flask
+from flask import url_for
 from flask_wtf import CSRFProtect
 from werkzeug.utils import redirect
 
@@ -38,6 +39,8 @@ if __name__ == '__main__':
     else:
         initial_run = False
 
+    initial_run = True
+
     csrf = CSRFProtect()
 
     app = Flask(__name__)
@@ -50,13 +53,13 @@ if __name__ == '__main__':
     app.config['RECAPTCHA_PRIVATE_KEY'] = parser.get('recaptcha', 'secret_key')
     app.config['RECAPTCHA_DATA_ATTRS'] = {'size': 'compact'}
 
-    while initial_run:
-        redirect(to_url('first-run'))
 
-    try:
-        initialise_users_for_routes()
-        app.secret_key = os.urandom(24)
-        app.run(host=environment.SRVHOST, port=environment.SRVPORT, debug=environment.DEBUG)
-    except Exception as e:
-        print "Error starting Flask server. Check that Neo4J is running."
-        sys.exit(1)
+    # try:
+    initialise_users_for_routes()
+    app.secret_key = os.urandom(24)
+    app.run(host=environment.SRVHOST, port=environment.SRVPORT, debug=environment.DEBUG)
+    while initial_run:
+        redirect(url_for('first-run'))
+    # except Exception as e:
+    #     print "Error starting Flask server. Check that Neo4J is running."
+    #     sys.exit(1)
