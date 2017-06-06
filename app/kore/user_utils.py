@@ -71,7 +71,7 @@ class NewUser(object):
         self.is_dev = self.set_priv_status(request_form, 'role_dev')
 
     def set_priv_status(self, d, k):
-        # TODO (ecolq): This looks flawed - shouldn't be take the role if it exists, else false?
+        # TODO (ecolq): This looks flawed - shouldn't we take the role if it exists, else false?
         try:
             d[k]
         except KeyError:

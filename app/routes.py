@@ -86,7 +86,8 @@ def first_run():
     if request.method == 'POST':
         status = kore.first_run(request.form)
         if status[1] == 200:
-            login()
+            return login()
+
             # initial_run = False  # This tells us that we have successfully configured the server
     else:
         return render_template('first-run.html')
