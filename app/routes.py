@@ -9,7 +9,7 @@ from flask import Flask, render_template, redirect, url_for, request, session
 #########[ GLOBAL PARAMS ]#################                        
 DEBUG = True                
 SRVHOST = '0.0.0.0'
-SRVPORT = 8001
+SRVPORT = 80
          
 #########[ BASIC MODULES ]#################                        
 def loginCheck(**kwargs):
