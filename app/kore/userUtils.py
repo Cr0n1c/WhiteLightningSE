@@ -124,7 +124,7 @@ def setUsername(username):
     #passed all the checks, now formatting it
     return username.lower()
 
-def setPassword(seed, password):
+def setPassword(seed, password, use_seed = True):
     #set to match rules in static/js/gsdk-bootstrap-wizard.js
     if password is None:
         return False
@@ -135,8 +135,11 @@ def setPassword(seed, password):
 
     #passed all the checks, now formatting it
     password = password.strip()
-    encrypted_password = hashlib.sha512(seed + password).hexdigest()
-    return encrypted_password
+    if use_seed:
+        encrypted_password = hashlib.sha512(seed + password).hexdigest()
+        return encrypted_password
+    else:
+        return password
 
 def setState(state):
     if state is None or state.strip() == "":

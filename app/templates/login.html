@@ -1,11 +1,10 @@
-<!DOCTYPE html>
 <html>
-
 <head>
     <meta charset="UTF-8">
-    <title>WHITELIGHTNING | LOGIN</title>  
-    <link rel="shortcut icon" href="static/img/favicon.ico"/>
+    <title>WHiLI | LOGIN</title>  
+    <link rel="shortcut icon" href="static/img/favicon.ico">
     <link rel="stylesheet" href="static/css/reset.min.css">
+    <link rel="stylesheet" href="static/css/login.min.css">
     <style>
         /* NOTE: The styles were added inline because Prefixfree needs access to these styles and they must be inlined */
 
@@ -18,6 +17,7 @@
             background: #333;
             font: 100%/1 "Helvetica Neue", Arial, sans-serif;
         }
+
 
         .login {
             position: absolute;
@@ -215,13 +215,21 @@
     <div class="login">
         <header class="login-header"><span class="text">WhiteLightningSE</span><span class="loader"></span></header>
         <form class="login-form" action="" method="post">
-            <input class="login-input" type="text" placeholder="Username" id=username name=username value={{request.form.username}}>
-            <input class="login-input" type="password" placeholder="Password" id=password name=password value={{request.form.password}}>
-            <button class="login-btn" type="submit">login</button>
-        </form>
+            {{ form.csrf_token }}
+            {{ form.username(class_="login-input") }}
+            {{ form.password(class_="login-input") }}
+            <ul>
+            {% for error in form.password.errors %}
+                <li style="color:red;">{{ error }}</li>
+            {% endfor %}
 
-        {% if error['code'] %}
-        <p class="login-error"><strong>     ERROR:</strong> {{ error['message'] }}</p> {% endif %}
+            {% for error in form.username.errors %}
+                <li style="color:red;">{{ error }}</li>
+            {% endfor %}
+            </ul><br>
+            {{ form.recaptcha }}
+            <button class="login-btn" type="submit">Login</button>    
+        </form>
     </div>
 
     <script src="static/js/prefixfree.min.js"></script>

@@ -1,3 +1,4 @@
+import os
 import py2neo
 import re
 
@@ -10,8 +11,7 @@ except ImportError:
 
 #Reading from config file
 parser = SafeConfigParser()
-#with open('../conf/whitelightning.conf') as f:
-with open('/var/www/WhiteLightningSE/conf/whitelightning.conf') as f:
+with open(os.path.join(os.getcwd(), "..", "conf", "whitelightning.conf")) as f:
     parser.readfp(f)
 
 DB_SERVER   = parser.get('database', 'url')
@@ -61,7 +61,8 @@ def userLogin(username, password, db):
     if not username or not password:
         return "Something phishy is happening"
 
-    user = db.queryFirst("MATCH (u:_USER {username: '%s', password: '%s'}) RETURN u" %(username, password))
+    user = db.queryFirst("MATCH (u:_USER {username: '%s', password: '%s'}) RETURN u" %
+        (username, password))
 
     if len(user) == 0:
         error = "Username and password combo do not match"
@@ -69,7 +70,7 @@ def userLogin(username, password, db):
     return error
 
 def getAllUsers():
-    #will clean this up later, just needed it for login purposes
+    
     try:
         graph = py2neo.Graph(DB_SERVER, user=DB_USERNAME, password=DB_PASSWORD)
     except py2neo.Unauthorized:

@@ -1,11 +1,14 @@
 #!/usr/bin/python           
+from ConfigParser import SafeConfigParser
 import json                 
 import os                   
+
+from flask import Flask, render_template, redirect, url_for, request, session  
+from flask_wtf.csrf import CSRFProtect
+
 import kore
 from kore.empirerpc import EmpireRpc
-                           
-from flask import Flask, render_template, redirect, url_for, request, session  
-                       
+
 #########[ GLOBAL PARAMS ]#################                        
 DEBUG = True                
 SRVHOST = '0.0.0.0'
@@ -16,7 +19,11 @@ def loginCheck(**kwargs):
     if not session.get('logged_in'):
         return redirect(url_for('login'))
     else:
-        return render_template(session.get('current_url'), user=users[session.get('username')], **kwargs)
+        return render_template(
+                session.get('current_url'), 
+                             user=users[session.get('username')], 
+                             **kwargs
+                )
 
 def updatePage(current_title, current_url):
     if current_url == session.get('current_url'):
@@ -30,14 +37,38 @@ def updatePage(current_title, current_url):
     session['previous_title'] = session.get('current_title')
     session['current_url'] = current_url
     session['current_title'] = current_title
-                       
-#########[ APP STARTUP ]###################                        
-app = Flask(__name__)       
+
+#########[ APP STARTUP ]###################
+
+#Reading in config
+parser = SafeConfigParser()
+
+try:
+    with open(os.path.join(os.getcwd(),"..", "conf", "whitelightning.conf")) as f:
+        parser.readfp(f)
+except IOError:
+    initial_run = True
+else:
+    initial_run = False
+
+csrf = CSRFProtect()
+      
+app = Flask(__name__)
+csrf.init_app(app)
+
+app.config['RECAPTCHA_PUBLIC_KEY'] = parser.get('recaptcha', 'site_key')
+app.config['RECAPTCHA_PRIVATE_KEY'] = parser.get('recaptcha', 'secret_key')
+app.config['RECAPTCHA_DATA_ATTRS'] = {'size': 'compact'}                           
 
 # Setup EmpireRPC
-empirerpc = EmpireRpc('104.236.48.159',23698,username='empirerpc',password='test123test!@#')
-                            
+app.config['EMPIRERPC_IP'] = parser.get('empirerpc', 'ip')
+app.config['EMPIRERPC_PORT'] = parser.get('empirerpc', 'port')
+app.config['EMPIRERPC_USER'] = parser.get('empirerpc', 'username')
+app.config['EMPIRERPC_PASS'] = parser.get('empirerpc', 'password')
+empirerpc = EmpireRpc(app.config['EMPIRERPC_IP'],app.config['EMPIRERPC_PORT'],username=app.config['EMPIRERPC_USER'],password=app.config['EMPIRERPC_PASS'])
+
 ########[ WEB PAGES ]#####################                         
+
 @app.route('/')             
 @app.route('/home')         
 @app.route('/index')        
@@ -47,55 +78,36 @@ def home():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    global users
-    error = { 'code'   : None,
-              'message': None
-            }
+    form = kore.templateLogin.LoginForm()
 
-    if request.method == 'POST':
-        try:
-            username = request.form['username'].lower()
-            password = request.form['password']
-        except KeyError:
-            error['code'] = 2 #User is bypassing the UX
-            error['message'] = "Malicious login attempt"
-        else:
-            if users.get(username) is None:
-                error['code'] = 3 #User does not exists
-                error['message'] = "Invalid Creds"
-            else:
-                error['message'] = kore.neo4j.userLogin(username, password, db)
-                if error['message'] and users[username]:
-                    try:
-                        users[username]['login_atttempt'] += 1
-                    except KeyError:
-                        users[username]['login_attempt'] = 1
-                        error['code'] = 4 #Failed login
-                    else:
-                        if users[username]['login_attempt'] > 2:
-                             error['code'] = 5 #Force reCaptcha
-                        else:
-                             error['code'] = 4 #Failed login
-
-        if error['code'] is None:
-            session['username'] = username
-            session['logged_in'] = True
-            session['login_attempt'] = 0
-            session['sidebar_collapse'] = False
-            return redirect(url_for('home'))
-        else:
-            print error
-            return render_template('login.html', error=error)
-    elif request.method == 'GET':
-        if session.get('logged_in'):
-            return redirect(url_for('home'))
-        else:
-            return render_template('login.html', error=error)
+    if form.validate_on_submit() and users[form.username.data] and \
+       kore.neo4j.userLogin(form.username.data, form.password.data, db) is None:
+        session['username'] = form.username.data
+        session['logged_in'] = True
+        session['sidebar_collapse'] = False
+        return redirect(url_for('home'))
+    else:
+        return render_template('login.html', form=form)
 
 @app.route('/logout')
 def logout():
     session.clear()
     return redirect(url_for('login'))
+
+@app.route('/first-run', methods=['GET', 'POST'])
+def firstRun():
+    global initial_run
+    
+    #DEBUG, change back to this when ready: if not initial_run:
+    if initial_run:
+        return redirect(url_for('home'))
+    
+    if request.method == 'POST':
+        status = kore.firstRun(request.form)
+        if status[1] == 200:
+            initial_run = False #This tells us that we have successfully configured the server
+    else: 
+        return render_template('first-run.html')
 
 @app.route('/user-control-panel', methods=['GET', 'POST'])
 def userControlPanel():
@@ -119,15 +131,16 @@ def userControlPanel():
 def updateUserRole():
     status = True
     if session['logged_in'] and users[session['username']]['is_admin']:
-        status = kore.templateUserControlPanel.updateUserRole(db, request.form['name'], request.form['property'], request.form['value'])
-    else:
-        print "something is going horrible"
+        status = kore.templateUserControlPanel.updateUserRole(
+            db, 
+            request.form['name'], 
+            request.form['property'], 
+            request.form['value']
+        )
 
     if status:
-        print "status is good"
         return json.dumps({'success':True}), 200, {'ContentType':'application/json'}
     else:
-        print "statis is no good"
         return json.dumps({'success':False}), 401, {'ContentType':'application/json'}
 
 @app.route('/user-profile')
@@ -170,6 +183,9 @@ def error():
     pass
 
 if __name__ == '__main__':
+    while initial_run:
+        redirect(to_url('first-run'))
+
     users = kore.neo4j.getAllUsers()
     db = kore.neo4j.Initialize()
     app.secret_key = os.urandom(24)
