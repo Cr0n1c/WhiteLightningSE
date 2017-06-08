@@ -13,16 +13,17 @@ urllib3.disable_warnings()
 
 def first_run(request_form):
     try:
+        # TODO(ecolq): Encrypt as many of these creds as possible and store in neo4j. See Issue #36
         db_server, none = validate_server(request_form["dbserver"], None, "neo4j")
         db_username = user_utils.set_username(request_form["dbusername"])
         db_password = request_form["dbpassword"]
 
         ui_username = user_utils.set_username(request_form["uiusername"])
-        ui_password = user_utils.set_password(ui_username, request_form["uipassword"])
+        ui_password = user_utils.set_password(request_form["uipassword"])
 
         (empire_server, empire_port) = validate_server(request_form["empireserver"], request_form["empireport"])
         empire_username = user_utils.set_username(request_form["empireusername"])
-        empire_password = user_utils.set_password(None, request_form["empirepassword"], False)
+        empire_password = request_form["empirepassword"]
 
         recaptcha_site_key = validate_re_captcha(request_form["recaptchasite"])
         recaptcha_secret_key = validate_re_captcha(request_form["recaptchasecret"])

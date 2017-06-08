@@ -1,6 +1,7 @@
-import hashlib
 import re
 import uuid
+
+import bcrypt as bcrypt
 
 
 class UserInformation(object):
@@ -129,22 +130,19 @@ def set_username(username):
     return username.lower()
 
 
-def set_password(seed, password, use_seed=True):
+def set_password(password):
     # set to match rules in static/js/gsdk-bootstrap-wizard.js
     if password is None:
         return False
     elif len(password) < 7 or len(password) > 20:
         return False
-    elif not re.match("^[^'\"\\s]{1,}$", password):
+    elif not re.match("^[^'\"\\s]+$", password):
         return False
 
     # passed all the checks, now formatting it
     password = password.strip()
-    if use_seed:
-        encrypted_password = hashlib.sha512(seed + password).hexdigest()
-        return encrypted_password
-    else:
-        return password
+    encrypted_password = bcrypt.hashpw(password, bcrypt.gensalt())
+    return encrypted_password
 
 
 def set_state(state):
