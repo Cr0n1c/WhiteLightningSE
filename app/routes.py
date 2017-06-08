@@ -1,17 +1,19 @@
 #!/usr/bin/python           
+from ConfigParser import SafeConfigParser
 import json                 
 import os                   
-import kore                 
-                            
-from ConfigParser import SafeConfigParser
+
 from flask import Flask, render_template, redirect, url_for, request, session  
 from flask_wtf.csrf import CSRFProtect
 
+import kore
+from kore.empirerpc import EmpireRpc
+
 #########[ GLOBAL PARAMS ]#################                        
 DEBUG = True                
-SRVHOST = '0.0.0.0'         
-SRVPORT = 80                
-                            
+SRVHOST = '0.0.0.0'
+SRVPORT = 80
+         
 #########[ BASIC MODULES ]#################                        
 def loginCheck(**kwargs):
     if not session.get('logged_in'):
@@ -53,10 +55,21 @@ csrf = CSRFProtect()
       
 app = Flask(__name__)
 csrf.init_app(app)
-       
+
 app.config['RECAPTCHA_PUBLIC_KEY'] = parser.get('recaptcha', 'site_key')
 app.config['RECAPTCHA_PRIVATE_KEY'] = parser.get('recaptcha', 'secret_key')
 app.config['RECAPTCHA_DATA_ATTRS'] = {'size': 'compact'}                           
+
+# Setup EmpireRPC
+app.config['EMPIRERPC_IP'] = parser.get('empirerpc', 'ip')
+app.config['EMPIRERPC_PORT'] = parser.get('empirerpc', 'port')
+app.config['EMPIRERPC_USER'] = parser.get('empirerpc', 'username')
+app.config['EMPIRERPC_PASS'] = parser.get('empirerpc', 'password')
+empirerpc = EmpireRpc(app.config['EMPIRERPC_IP'],
+                      app.config['EMPIRERPC_PORT'],
+                      username=app.config['EMPIRERPC_USER'],
+                      password=app.config['EMPIRERPC_PASS'])
+
 ########[ WEB PAGES ]#####################                         
 
 @app.route('/')             
@@ -147,6 +160,25 @@ def assetTracking():
 def assetDiscovery():
     updatePage("assetDiscovery", "asset-discovery.html")
     return loginCheck()
+
+@app.route('/terminal', methods=['GET', 'POST'])
+def handle_terminal():
+    if request.method == 'POST' and session.get('logged_in') and request.args.get('id') is not None:
+        command = request.get_json(force=True, silent=True)
+        agent_name = request.args.get('id')
+        if empirerpc is None:
+            success = False
+            message = 'Unable to connect to Empire!'
+            status_code = 503
+        else:
+            retval = empirerpc.handle_command(command.get('command', 'help'), agent_name=agent_name)
+            success = retval.get('success', False)
+            message = retval.get('message', 'Success!' if success else 'Unknown Error!')
+            status_code = 200
+        return json.dumps({'success':success, 'message':message}), status_code, {'ContentType':'application/json'}
+
+    update_page('terminal','terminal.html')
+    return login_check()
 
 ###############[ ERROR HANDLING ]########################
 @app.route('/error')
