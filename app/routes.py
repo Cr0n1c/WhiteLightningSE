@@ -87,7 +87,7 @@ def home():
 def login():
     form = kore.template_login.LoginForm()
 
-    if form.validate_on_submit() and form.username.data in users and \
+    if form.validate_on_submit() and \
             kore.neo4j.user_login(form.username.data, form.password.data, db) is None:
         session['username'] = form.username.data
         session['logged_in'] = True
