@@ -30,11 +30,6 @@ class UserControlPanelPage(object):
             user.is_admin = res['u.isAdmin']
 
             # TODO (ecolq): Figure out what this is used for/remove?
-            for k in [user.is_admin, user.is_eng, user.is_dev]:
-                if k == "true":
-                    k = True
-                else:
-                    k = False
             user_list.append(user)
 
         return user_list

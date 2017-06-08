@@ -74,21 +74,10 @@ def logout():
 
 @routes.route('/first-run', methods=['GET', 'POST'])
 def first_run():
-    # global initial_run
-    #
-    # if initial_run is None:
-    #     initial_run = True
-    #
-    # DEBUG, change back to this when ready: if not initial_run:
-    # if not initial_run:
-    #     return redirect(url_for('routes.home'))
-
     if request.method == 'POST':
         status = kore.first_run(request.form)
         if status[1] == 200:
             return login()
-
-            # initial_run = False  # This tells us that we have successfully configured the server
     else:
         return render_template('first-run.html')
 

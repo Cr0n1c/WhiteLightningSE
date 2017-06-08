@@ -66,19 +66,6 @@ def first_run(request_form):
         f.write("site_key = " + recaptcha_site_key + newline)
         f.write("secret_key = " + recaptcha_secret_key + newline)
 
-    # Build the database
-    # url = "https:" + db_server.split(":")[1] + ":7473/user/neo4j/password"
-    # base64_username_password = base64.b64encode("{}:{}".format(db_username, db_password))
-    # headers = {
-    #     "Content-Type": "application/json",
-    #     "Authorization": "Basic " + base64_username_password
-    #     }
-    # payload = {"password": db_password}
-    #
-    # r = requests.post(url, data=json.dumps(payload), headers=headers, verify=False)
-    # if r.status_code != 200:
-    #     return json.dumps({'success': False}), r.status_code, {'ContentType': 'application/json'}
-
     # Add first User to database
     db = neo4j.Initialize()
 
@@ -147,4 +134,5 @@ def validate_re_captcha(arg1):
 
 
 def validate_re_captcha_keys(arg1, arg2):
+    # TODO(ecolq): Implementation
     return True

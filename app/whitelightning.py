@@ -53,13 +53,12 @@ if __name__ == '__main__':
     app.config['RECAPTCHA_PRIVATE_KEY'] = parser.get('recaptcha', 'secret_key')
     app.config['RECAPTCHA_DATA_ATTRS'] = {'size': 'compact'}
 
-
-    # try:
-    initialise_users_for_routes()
-    app.secret_key = os.urandom(24)
-    app.run(host=environment.SRVHOST, port=environment.SRVPORT, debug=environment.DEBUG)
-    while initial_run:
-        redirect(url_for('first-run'))
-    # except Exception as e:
-    #     print "Error starting Flask server. Check that Neo4J is running."
-    #     sys.exit(1)
+    try:
+        initialise_users_for_routes()
+        app.secret_key = os.urandom(24)
+        app.run(host=environment.SRVHOST, port=environment.SRVPORT, debug=environment.DEBUG)
+        while initial_run:
+            redirect(url_for('first-run'))
+    except Exception as e:
+        print "Error starting Flask server. Check that Neo4J is running."
+        sys.exit(1)
