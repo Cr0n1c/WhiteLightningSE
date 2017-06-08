@@ -91,7 +91,7 @@ def first_run(request_form):
         "country": "Unknown",
         "department": "Unknown",
         "email": "admin@whitelightning",
-        "firstname": "Administator",
+        "firstname": "Administrator",
         "lastname": "",
         "role_adm": True,
         "role_dev": True,
@@ -139,12 +139,6 @@ def create_new_user(request_form, db):
 def validate_server(host, port, db=None):
     # TODO(ecolq): Implementation
     return (host, port)
-    # if port:
-    #     if re.match("^([0-9]{1,4}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])$", port):
-    #         return True, True
-    #     else:
-    #         return True, False
-    # else:
 
 
 def validate_re_captcha(arg1):

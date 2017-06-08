@@ -95,13 +95,13 @@ def first_run():
 
 @routes.route('/user-control-panel', methods=['GET', 'POST'])
 def user_control_panel():
-    update_page('userControlPanel', 'user-control-panel.html')
+    update_page('user_control_panel', 'user-control-panel.html')
 
     # registration piece
     if request.method == 'POST' and session.get('logged_in'):
         status = kore.create_new_user(request.form, db)
         if status == "ok":
-            return redirect(url_for(session['current_title']))
+            return redirect(url_for('routes.' + session['current_title']))
 
     try:
         if not users[session['username']]['is_admin']:
