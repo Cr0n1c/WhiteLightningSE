@@ -16,8 +16,12 @@ global users
 
 def initialise_users_for_routes():
     global db
-    global users
     db = kore.neo4j.Initialize()
+    update_users_dict()
+
+
+def update_users_dict():
+    global users
     users = kore.neo4j.get_all_users()
         
 def login_check(**kwargs):
@@ -87,7 +91,7 @@ def home():
 def login():
     form = kore.template_login.LoginForm()
 
-    if form.validate_on_submit() and form.username.data in users and \
+    if form.validate_on_submit() and \
             kore.neo4j.user_login(form.username.data, form.password.data, db) is None:
         session['username'] = form.username.data
         session['logged_in'] = True
@@ -118,6 +122,7 @@ def user_control_panel():
     if request.method == 'POST' and session.get('logged_in'):
         status = kore.create_new_user(request.form, db)
         if status == "ok":
+            update_users_dict()
             return redirect(url_for('routes.' + session['current_title']))
 
     try:
@@ -134,12 +139,13 @@ def update_user_role():
     if session['logged_in'] and users[session['username']]['is_admin']:
         status = kore.template_user_control_panel.update_user_role(
             db,
-            request.form['name'],
+            request.form['username'],
             request.form['property'],
             request.form['value']
         )
 
     if status:
+        update_users_dict()
         return json.dumps({'success': True}), 200, {'ContentType': 'application/json'}
     else:
         return json.dumps({'success': False}), 401, {'ContentType': 'application/json'}
