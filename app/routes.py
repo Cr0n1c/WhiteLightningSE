@@ -19,7 +19,6 @@ def initialise_users_for_routes():
     db = kore.neo4j.Initialize()
     update_users_dict()
 
-
 def update_users_dict():
     global users
     users = kore.neo4j.get_all_users()
@@ -165,7 +164,7 @@ def asset_discovery():
     update_page("assetDiscovery", "asset-discovery.html")
     return login_check()
 
-@app.route('/terminal', methods=['GET', 'POST'])
+@routes.route('/terminal', methods=['GET', 'POST'])
 def handle_terminal():
     if request.method == 'POST' and session.get('logged_in') and request.args.get('id') is not None:
         command = request.get_json(force=True, silent=True)
@@ -188,3 +187,13 @@ def handle_terminal():
 @routes.route('/error')
 def error():
     pass
+
+app.register_blueprint(routes)
+
+if __name__ == '__main__':
+    '''
+    This is to enable debug testing of routes directly in Flask.  Not for production run through nginx/uwsgi.
+    '''
+    initialise_users_for_routes()
+    app.secret_key = os.urandom(24)
+    app.run(host='0.0.0.0',port=8081)
