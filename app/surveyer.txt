@@ -1,0 +1,3 @@
+['206.188.26.36'], [('chrome_plugin_id_0', u'cisco-webex')]
+['162.243.188.132'], [('pd_br_verGecko', u'52,0,0,0'), ('pd_br_isGecko', u'true'), ('pd_os', u'macintosh'), ('pd_br', u'gecko')]
+['1.129.97.134'], [('br_v', u'10,0,0,0'), ('pd_os', u'iphone'), ('pd_br', u'safari')]

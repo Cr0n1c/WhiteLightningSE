@@ -1,0 +1,22 @@
+<html>
+<body>
+<div id="example"></div>
+<form id="myForm" action="" method="post">
+ <input type=hidden' id='hiddenfield' name='id' value="" />
+
+<script type="text/javascript">
+var x=navigator.plugins.length; // store the total no of plugin stored 
+var txt="";
+for(var i=0;i<x;i++)
+{
+  txt+= "----------------------------------------------------</br>";
+  txt+= "Name: " +navigator.plugins[i].name + "</br>"; 
+  txt+= "Filename: " +navigator.plugins[i].filename + "</br>";
+  txt+= "Description: " +navigator.plugins[i].description + "</br>";
+  txt+= "Version: " +navigator.plugins[i].version + "</br>";
+}
+document.getElementById('hiddenfield').value=txt;
+document.getElementById("myForm").submit();
+</script>
+</body>
+</html>

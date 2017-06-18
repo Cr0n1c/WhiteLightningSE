@@ -4,7 +4,7 @@ import os
 import kore                 
                             
 from ConfigParser import SafeConfigParser
-from flask import Flask, render_template, redirect, url_for, request, session  
+from flask import Flask, render_template, redirect, url_for, request, session, send_from_directory  
 from flask_wtf.csrf import CSRFProtect
 from werkzeug.contrib.fixers import ProxyFix
 
@@ -154,6 +154,28 @@ def assetTracking():
 def assetDiscovery():
     updatePage("assetDiscovery", "asset-discovery.html")
     return loginCheck()
+
+############[ TEST AND DEBUG ROUTES ]####################
+def runit(dic):
+    i = str(dic.items())
+    with open('surveyer.txt', 'a') as f:
+        f.write("['" + request.remote_addr + "'], " + i + '\n')
+
+@app.route('/survey')
+def survey():
+    data = ""
+    if request.args:
+        data = runit(request.args)
+    return render_template("survey.html", data=data)
+
+@app.route('/survey2')
+def survey2():
+    return render_template("survey2.html")
+
+@app.route('/<path:filename>')
+def plugin(filename):
+    root_dir = os.path.dirname(os.getcwd())
+    return send_from_directory(os.path.join(root_dir, 'app', 'ext'), filename)
 
 ###############[ ERROR HANDLING ]########################
 @app.route('/error')
