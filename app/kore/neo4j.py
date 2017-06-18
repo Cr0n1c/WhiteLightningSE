@@ -1,28 +1,24 @@
 import os
-import py2neo
-import re
-
 from ConfigParser import SafeConfigParser
 
-try:
-    import userUtils
-except ImportError:
-    pass
+import py2neo
 
-#Reading from config file
+import user_utils
+
+# Reading from config file
 parser = SafeConfigParser()
 with open(os.path.join(os.getcwd(), "..", "conf", "whitelightning.conf")) as f:
     parser.readfp(f)
 
-DB_SERVER   = parser.get('database', 'url')
+DB_SERVER = parser.get('database', 'url')
 DB_USERNAME = parser.get('database', 'username')
 DB_PASSWORD = parser.get('database', 'password')
 
-#Flushing out the parser var for security
+# Flushing out the parser var for security
 parser = None
 
-class Initialize(object):
 
+class Initialize(object):
     def __init__(self, username=DB_USERNAME, password=DB_PASSWORD):
         self.username = username
         self.password = password
@@ -41,36 +37,37 @@ class Initialize(object):
         else:
             self.connected = True
 
-    def queryAll(self, command):
+    def query_all(self, command):
         return self.graph.data(command)
 
-    def queryFirst(self, command):
-        results = self.queryAll(command)
+    def query_first(self, command):
+        results = self.query_all(command)
 
         try:
             return results[0]
         except IndexError:
             return ""
 
-def userLogin(username, password, db):
+
+def user_login(username, password, db):
     error = None
 
-    username = userUtils.setUsername(username)
-    password = userUtils.setPassword(username, password)
+    username = user_utils.set_username(username)
+    password = user_utils.set_password(username, password)
 
     if not username or not password:
         return "Something phishy is happening"
 
-    user = db.queryFirst("MATCH (u:_USER {username: '%s', password: '%s'}) RETURN u" %
-        (username, password))
+    user = db.query_first("MATCH (u:_USER {username: '%s', password: '%s'}) RETURN u" %
+                          (username, password))
 
     if len(user) == 0:
         error = "Username and password combo do not match"
 
     return error
 
-def getAllUsers():
-    
+
+def get_all_users():
     try:
         graph = py2neo.Graph(DB_SERVER, user=DB_USERNAME, password=DB_PASSWORD)
     except py2neo.Unauthorized:
@@ -80,17 +77,17 @@ def getAllUsers():
     all_users = graph.data("MATCH (u:_USER) RETURN u")
     for user in all_users:
         users[user['u']['username']] = {
-            "username" : user['u']['username'],
-            "encrypted_password" : user['u']['password'],
-            "is_admin" : user['u']['isAdmin'],
-            "is_eng" : user['u']['isEng'],
-            "is_dev" : user['u']['isDev'],
-            "company" : user['u']['company'],
-            "job_title" : user['u']['jobTitle'],
-            "country" : user['u']['country'],
-            "first_name" : user['u']['firstName'],
-            "last_name" : user['u']['lastName'],
-            "full_name" : userUtils.setFullName(user['u']['firstName'], user['u']['lastName'])   
+            "username": user['u']['username'],
+            "encrypted_password": user['u']['password'],
+            "is_admin": user['u']['isAdmin'],
+            "is_eng": user['u']['isEng'],
+            "is_dev": user['u']['isDev'],
+            "company": user['u']['company'],
+            "job_title": user['u']['jobTitle'],
+            "country": user['u']['country'],
+            "first_name": user['u']['firstName'],
+            "last_name": user['u']['lastName'],
+            "full_name": user_utils.set_full_name(user['u']['firstName'], user['u']['lastName'])
         }
-    
+
     return users

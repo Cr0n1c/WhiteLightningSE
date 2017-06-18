@@ -169,6 +169,7 @@
 											</div>
 											<div class="wizard-footer height-wizard">
 												<div class="pull-right">
+													<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
 													<input type='button' class='btn btn-next btn-fill btn-info btn-wd btn-sm' name='next' id='next' value='Next' />
 													<input type='submit' class='btn btn-finish btn-fill btn-info btn-wd btn-sm' name='finish' id='finish' value='Finish' />
 												</div>
@@ -202,7 +203,7 @@
                 </tr>
                 </thead>
                 <tbody>
-                {% for user_profile in ucp.queryAllUser() %}
+                {% for user_profile in ucp.query_all_user() %}
 				<tr>  
                   <td id="username-{{user_profile.id}}">{{user_profile.username}}</td>
                   <td id="fullname-{{user_profile.id}}">{{user_profile.full_name}}</td>

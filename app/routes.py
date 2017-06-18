@@ -1,31 +1,36 @@
-#!/usr/bin/python           
+#!/usr/bin/python
 from ConfigParser import SafeConfigParser
 import json                 
 import os                   
 
-from flask import Flask, render_template, redirect, url_for, request, session  
+from flask import Flask, Blueprint, render_template, redirect, url_for, request, session  
 from flask_wtf.csrf import CSRFProtect
 
 import kore
 from kore.empirerpc import EmpireRpc
 
-#########[ GLOBAL PARAMS ]#################                        
-DEBUG = True                
-SRVHOST = '0.0.0.0'
-SRVPORT = 80
-         
-#########[ BASIC MODULES ]#################                        
-def loginCheck(**kwargs):
+
+# TODO (ecolq) AWFUL HACK: Remove these globals
+global db
+global users
+
+def initialise_users_for_routes():
+    global db
+    global users
+    db = kore.neo4j.Initialize()
+    users = kore.neo4j.get_all_users()
+        
+def login_check(**kwargs):
     if not session.get('logged_in'):
-        return redirect(url_for('login'))
+        return redirect(url_for('routes.login'))
     else:
         return render_template(
-                session.get('current_url'), 
-                             user=users[session.get('username')], 
-                             **kwargs
-                )
+            session.get('current_url'),
+            user=users[session.get('username')],
+            **kwargs
+        )
 
-def updatePage(current_title, current_url):
+def update_page(current_title, current_url):
     if current_url == session.get('current_url'):
         return
 
@@ -52,7 +57,8 @@ else:
     initial_run = False
 
 csrf = CSRFProtect()
-      
+
+routes = Blueprint('routes', __name__)
 app = Flask(__name__)
 csrf.init_app(app)
 
@@ -70,96 +76,88 @@ empirerpc = EmpireRpc(app.config['EMPIRERPC_IP'],
                       username=app.config['EMPIRERPC_USER'],
                       password=app.config['EMPIRERPC_PASS'])
 
-########[ WEB PAGES ]#####################                         
+@routes.route('/')
+@routes.route('/home')
+@routes.route('/index')
+def home():
+    update_page("home", "index.html")
+    return login_check()
 
-@app.route('/')             
-@app.route('/home')         
-@app.route('/index')        
-def home():                        
-    updatePage("home", "index.html")                                
-    return loginCheck()
-
-@app.route('/login', methods=['GET', 'POST'])
+@routes.route('/login', methods=['GET', 'POST'])
 def login():
-    form = kore.templateLogin.LoginForm()
+    form = kore.template_login.LoginForm()
 
-    if form.validate_on_submit() and users[form.username.data] and \
-       kore.neo4j.userLogin(form.username.data, form.password.data, db) is None:
+    if form.validate_on_submit() and form.username.data in users and \
+            kore.neo4j.user_login(form.username.data, form.password.data, db) is None:
         session['username'] = form.username.data
         session['logged_in'] = True
         session['sidebar_collapse'] = False
-        return redirect(url_for('home'))
+        return redirect(url_for('routes.home'))
     else:
         return render_template('login.html', form=form)
 
-@app.route('/logout')
+@routes.route('/logout')
 def logout():
     session.clear()
-    return redirect(url_for('login'))
+    return redirect(url_for('routes.login'))
 
-@app.route('/first-run', methods=['GET', 'POST'])
-def firstRun():
-    global initial_run
-    
-    #DEBUG, change back to this when ready: if not initial_run:
-    if initial_run:
-        return redirect(url_for('home'))
-    
+@routes.route('/first-run', methods=['GET', 'POST'])
+def first_run():
     if request.method == 'POST':
-        status = kore.firstRun(request.form)
+        status = kore.first_run(request.form)
         if status[1] == 200:
-            initial_run = False #This tells us that we have successfully configured the server
-    else: 
+            return login()
+    else:
         return render_template('first-run.html')
 
-@app.route('/user-control-panel', methods=['GET', 'POST'])
-def userControlPanel():
-    updatePage('userControlPanel', 'user-control-panel.html')
+@routes.route('/user-control-panel', methods=['GET', 'POST'])
+def user_control_panel():
+    update_page('user_control_panel', 'user-control-panel.html')
 
-    #registration piece
+    # registration piece
     if request.method == 'POST' and session.get('logged_in'):
-        status = kore.createNewUser(request.form, db)
+        status = kore.create_new_user(request.form, db)
         if status == "ok":
-            return redirect(url_for(session['current_title']))
+            return redirect(url_for('routes.' + session['current_title']))
 
     try:
         if not users[session['username']]['is_admin']:
-            return redirect(url_for('error'))
+            return redirect(url_for('routes.error'))
     except KeyError:
-        return loginCheck()
+        return login_check()
 
-    return loginCheck(ucp = kore.templateUserControlPanel.UserControlPanelPage(db))
+    return login_check(ucp=kore.template_user_control_panel.UserControlPanelPage(db))
 
-@app.route('/update-user-role', methods=['POST'])
-def updateUserRole():
+@routes.route('/update-user-role', methods=['POST'])
+def update_user_role():
     status = True
     if session['logged_in'] and users[session['username']]['is_admin']:
-        status = kore.templateUserControlPanel.updateUserRole(
-            db, 
-            request.form['name'], 
-            request.form['property'], 
+        status = kore.template_user_control_panel.update_user_role(
+            db,
+            request.form['name'],
+            request.form['property'],
             request.form['value']
         )
 
     if status:
-        return json.dumps({'success':True}), 200, {'ContentType':'application/json'}
+        return json.dumps({'success': True}), 200, {'ContentType': 'application/json'}
     else:
-        return json.dumps({'success':False}), 401, {'ContentType':'application/json'}
+        return json.dumps({'success': False}), 401, {'ContentType': 'application/json'}
 
-@app.route('/user-profile')
-def userProfile():
-    updatePage("userProfile", "user-profile.html")
-    return loginCheck()
+@routes.route('/user-profile')
+def user_profile():
+    update_page("userProfile", "user-profile.html")
+    return login_check()
 
-@app.route('/asset-tracking')
-def assetTracking():
-    updatePage("assetTracking", "asset-tracking.html")
-    return loginCheck()
+@routes.route('/asset-tracking')
+def asset_tracking():
+    update_page("assetTracking", "asset-tracking.html")
+    return login_check()
 
-@app.route('/asset-discovery')
-def assetDiscovery():
-    updatePage("assetDiscovery", "asset-discovery.html")
-    return loginCheck()
+@routes.route('/asset-discovery')
+def asset_discovery():
+    update_page("assetDiscovery", "asset-discovery.html")
+    return login_check()
 
 @app.route('/terminal', methods=['GET', 'POST'])
 def handle_terminal():
@@ -181,15 +179,6 @@ def handle_terminal():
     return login_check()
 
 ###############[ ERROR HANDLING ]########################
-@app.route('/error')
+@routes.route('/error')
 def error():
     pass
-
-if __name__ == '__main__':
-    while initial_run:
-        redirect(to_url('first-run'))
-
-    users = kore.neo4j.getAllUsers()
-    db = kore.neo4j.Initialize()
-    app.secret_key = os.urandom(24)
-    app.run(host=SRVHOST, port=SRVPORT, debug=DEBUG)
