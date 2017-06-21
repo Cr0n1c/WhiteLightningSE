@@ -52,14 +52,14 @@ class Initialize(object):
 def user_login(username, password, db):
     error = None
 
-    username = user_utils.set_username(username)
-    password = user_utils.set_password(username, password)
+    formatted_username = user_utils.set_username(username)
+    encrypted_password = user_utils.set_password(password)
 
-    if not username or not password:
+    if not formatted_username or not encrypted_password:
         return "Something phishy is happening"
 
     user = db.query_first("MATCH (u:_USER {username: '%s', password: '%s'}) RETURN u" %
-                          (username, password))
+                          (formatted_username, encrypted_password))
 
     if len(user) == 0:
         error = "Username and password combo do not match"
