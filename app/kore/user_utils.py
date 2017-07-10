@@ -140,7 +140,7 @@ def set_password(password):
         return False
 
     # passed all the checks, now formatting it
-    password = password.strip()
+    password = password.strip().encode('utf-8')
     encrypted_password = bcrypt.hashpw(password, bcrypt.gensalt())
     return encrypted_password
 
