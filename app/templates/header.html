@@ -96,7 +96,8 @@
         <li {% if session['current_title'] == "home" %}class="active"{% endif %}><a href="index"><i class="fa fa-dashboard"></i> <span>Dashboard</span></a></li>
         <li {% if session['current_title'] == "assetTracking" %}class="active"{% endif %}><a href="asset-tracking"><i class="fa fa-database"></i> <span>Payload Manager</span></a></li>
         <li {% if session['current_title'] == "assetDiscovery" %}class="active"{% endif %}><a href="asset-discovery"><i class="fa fa-sitemap"></i> <span>Infections</span></a></li>
-        <li class="treeview"> 
+        {% if user['is_dev'] %}
+        <li class="treeview {% if session['current_title'] in ['website_template', 'domain_management'] %} active{% endif %}"> 
           <a><i class="fa fa-bell"></i> <span>SE Configuration</span>
             <span class="pull-right-container">
               <i class="fa fa-angle-left pull-right"></i>
@@ -107,6 +108,7 @@
             <li {% if session['current_title'] == "domain_management" %}class="active"{% endif %}><a href="alert-rule">Domain Management</a></li>
           </ul>
         </li>
+        {% endif %}
         {% if user['is_admin'] %}
         <li {% if session['current_title'] == "user_control_panel" %}class="active"{% endif %}><a href="user-control-panel"><i class="fa fa-user"></i> <span>Administration</span></a></li>
         {% endif %}

@@ -4,11 +4,10 @@ import json
 import os                   
 
 from flask import Flask, Blueprint, render_template, redirect, url_for, request, session  
-from flask_wtf.csrf import CSRFProtect
+#from flask_wtf.csrf import CSRFProtect
 
 import kore
 from kore.empirerpc import EmpireRpc
-
 
 # TODO (ecolq) AWFUL HACK: Remove these globals
 global db
@@ -59,11 +58,11 @@ except IOError:
 else:
     initial_run = False
 
-csrf = CSRFProtect()
+#csrf = CSRFProtect()
 
 routes = Blueprint('routes', __name__)
 app = Flask(__name__)
-#csrf.init_app(app) #TODO: find a way to disable this for the spoof_pages
+#csrf.init_app(app) 
 
 # Setup Recaptcha
 app.config['RECAPTCHA_PUBLIC_KEY'] = parser.get('recaptcha', 'site_key')

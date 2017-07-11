@@ -3,10 +3,8 @@
 {% block header %}
   <link rel="stylesheet" href="static/css/dataTables.bootstrap.css">
   <link rel="stylesheet" href="static/css/bootstrap-toggle.min.css">
-  <link href="static/css/registration.min.css" rel="stylesheet" >
   <link href="static/css/assets.min.css" rel="stylesheet">
   <link href="static/css/jquery.dataTables.css" rel="stylesheet">
-  <link href="static/css/page.website-template.css" rel="stylesheet">
   <link href="static/css/jquery.fileupload.css" rel="stylesheet">
 {% endblock %}
 
@@ -28,8 +26,8 @@
                 {% for template in wt %}
 				<tr>
                   <td>{{template[0]}}</td>
-                  <td>{{template[1]}}</td>
-                  <td>{{template[2]}}</td>
+                  <td><input type="checkbox" {% if template[1].lower() == "true" %}checked {% endif %} data-toggle="toggle" disabled data-on="Supported" data-off="Unsupported" data-size="small"></td>
+                  <td><input type="checkbox" {% if template[2].lower() == "true" %}checked {% endif %} data-toggle="toggle" disabled data-on="Supported" data-off="Unsupported" data-size="small"></td>
                   <td>
                       <div class="btn-group">
                             <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -53,17 +51,12 @@
                 </tr>
                 </tfoot>
               </table>
-              <div class="container">
-                <span class="btn btn-success fileinput-button">
-                  <i class="glyphicon glyphicon-plus"></i>
-                  <span>Add Template...</span>
-                  <input id="fileupload" type="file" name="files[]" multiple="">
-                </span></br></br>
-                <div id="progress" class="progress">
-                  <div class="progress-bar progress-bar-success"></div>
-                </div>
-                <div id="files" class="files"></div>
-              </div>
+              <span class="btn btn-info fileinput-button">
+                <i class="glyphicon glyphicon-plus"></i>
+                <span>Add Template...</span>
+                <input id="fileupload" type="file" name="files[]" multiple="">
+              </span>
+              <div id="files" class="files"></div>
             </div>
           </div>
         </div>
@@ -89,21 +82,10 @@ $(function () {
     var url = 'website-template';
     $('#fileupload').fileupload({
         url: url,
-        dataType: 'json',
-        done: function (e, data) {
-            $.each(data.result.files, function (index, file) {
-                $('<p/>').text(file.name).appendTo('#files');
-            });
-        },
-        progressall: function (e, data) {
-            var progress = parseInt(data.loaded / data.total * 100, 10);
-            $('#progress .progress-bar').css(
-                'width',
-                progress + '%'
-            );
-        }
-    }).prop('disabled', !$.support.fileInput)
-        .parent().addClass($.support.fileInput ? undefined : 'disabled');
+        dataType: 'json'
+      }).bind('fileuploadalways', function (e, data) {
+                window.location.reload(true);
+      })
 });
 </script>
 

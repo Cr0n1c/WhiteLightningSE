@@ -58,7 +58,7 @@ class NewUser(object):
         self.username = set_username(request_form['username'])
         # TODO (ecolq): Fix the code paths to get to here. The password is encrypted already, but maybe should be
         # delegated to this point?
-        self.encrypted_password = set_password(self.username, request_form['password'])
+        self.encrypted_password = set_password(request_form['password'])
         self.job_title = request_form['job']
         self.state = set_state(request_form['state'])
         self.country = set_country(request_form['country'])
