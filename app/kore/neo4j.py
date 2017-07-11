@@ -64,7 +64,7 @@ def user_login(username, password, db):
    
     try:
         if len(user) == 0 or user["u"]["password"].encode('utf-8') != bcrypt.hashpw(password.encode('utf-8'), user["u"]["password"].encode('utf-8')):
-        error = "Username and password combo do not match"
+            error = "Username and password combo do not match"
     except ValueError:
         error = "Database password is jacked up for this user"
     return error

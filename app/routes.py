@@ -65,6 +65,7 @@ routes = Blueprint('routes', __name__)
 app = Flask(__name__)
 #csrf.init_app(app) #TODO: find a way to disable this for the spoof_pages
 
+# Setup Recaptcha
 app.config['RECAPTCHA_PUBLIC_KEY'] = parser.get('recaptcha', 'site_key')
 app.config['RECAPTCHA_PRIVATE_KEY'] = parser.get('recaptcha', 'secret_key')
 app.config['RECAPTCHA_DATA_ATTRS'] = {'size': 'compact'}                           
@@ -183,12 +184,23 @@ def handle_terminal():
     update_page('terminal','terminal.html')
     return login_check()
 
+@routes.route('/website-template', methods=['GET', 'POST'])
+def website_template():
+    error = None
+    if request.method == "POST" and session.get("logged_in"):
+        if not kore.template_website_template.upload_new_template(request):
+            error = "Failed to upload file, validate it is a ZIP, with a config.ini in root, and has the required fields and value types"
+            
+    update_page("website_template", "website-template.html")
+    return login_check(wt=kore.template_website_template.get_templates(), error=error)
+
 ###############[ ERROR HANDLING ]########################
 @routes.route('/error')
 def error():
     pass
 
 #########[ DEBUG CRAP - REMOVE BEFORE PR ]##############
+'''This is for debugging purposes atm
 @routes.route('/linkedin', methods=["GET", "POST"])
 def linkedin():
     return render_template("spoofed_website_templates/linkedin/index.html")
@@ -200,6 +212,7 @@ def microsoft():
 @routes.route('/microsoft/<path:filename>', methods=["GET", "POST"])
 def microsoft_aux_files(filename):
     return render_template("spoofed_website_templates/microsoft/" + filename)
+'''
 
 @routes.route("/credential_thief", methods=["GET", "POST"])
 def hijack_creds():
