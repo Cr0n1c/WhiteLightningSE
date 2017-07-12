@@ -1,0 +1,30 @@
+<html>
+<body>
+
+
+<script type="text/javascript" src="static/js/survey.basic-functions.js"></script>
+<script type="text/javascript" src="static/js/survey.initial.js"></script>
+<script type="text/javascript" src="static/js/survey.chrome-functions.js"></script>
+
+<!-- Chrome Browser Detection TODO: Only Fire this off if Chrome is detected-->
+<script src='chrome-extension://hdokiejnpimakedhajhdlcegeplioahd/images/icon48.png' onload="add('LastPass Free Password Manager')"></script>
+<script src='chrome-extension://jlhmfgmfgeifomenelglieieghnjghma/manifest.json' onload="add('Cisco WebEx')"></script>
+<script src='chrome-extension://efaidnbmnnnibpcajpcglclefindmkaj/manifest.json' onload="add('Adobe Acrobat')"></script>
+<script src='chrome-extension://chklaanhfefbnpoihckbnefhakgolnmc/manifest.json' onload="add('JSONView')"></script>
+
+<script type="text/javascript" src="static/js/survey.plugin-detection.js"></script>
+<script type="text/javascript" src="static/js/survey.local-ip.js"></script>
+<script type="text/javascript" src="static/js/survey.post.js"></script>
+
+<script>
+    var browserSessionID = CreateSessionID();
+    var params = survey();
+    params = params + chrome_plugins + "&br_sess_id=" + browserSessionID;
+    params = params + "&remote_ip={{request.remote_addr}}";  
+    //Callback shit
+    setTimeout(function(){
+        params = params + "&local_ip=" + ip_addresses;
+        document.write(params);
+        PostData(params);
+    }, 1000);
+</script>

