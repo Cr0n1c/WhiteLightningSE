@@ -21,7 +21,11 @@
     var params = survey();
     params = params + chrome_plugins + "&br_sess_id=" + browserSessionID;
     params = params + "&remote_ip={{request.remote_addr}}";  
-    //Callback shit
+    
+    //Adding this line until we fully support campaigns
+    params = params + "&campaign=test_campaign";
+
+    //Callback related functions
     setTimeout(function(){
         params = params + "&local_ip=" + ip_addresses;
         document.write(params);
