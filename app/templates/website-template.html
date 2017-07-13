@@ -1,0 +1,92 @@
+{% extends "header.html" %}
+
+{% block header %}
+  <link rel="stylesheet" href="static/css/dataTables.bootstrap.css">
+  <link rel="stylesheet" href="static/css/bootstrap-toggle.min.css">
+  <link href="static/css/assets.min.css" rel="stylesheet">
+  <link href="static/css/jquery.dataTables.css" rel="stylesheet">
+  <link href="static/css/jquery.fileupload.css" rel="stylesheet">
+{% endblock %}
+
+{% block body %}
+      <div class="row">
+        <div class="col-xs-12">
+          <div class="box">
+            <div class="box-body">
+              <table id="user-control-panel-table" class="display nowrap">
+                <thead>
+                <tr>
+                  <th>Template Name</th>
+                  <th>Inject Allowed</th>
+				  <th>Cred Hijack Allowed</th>
+                  <th>Modify</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for template in wt %}
+				<tr>
+                  <td>{{template[0]}}</td>
+                  <td><input type="checkbox" {% if template[1].lower() == "true" %}checked {% endif %} data-toggle="toggle" disabled data-on="Supported" data-off="Unsupported" data-size="small"></td>
+                  <td><input type="checkbox" {% if template[2].lower() == "true" %}checked {% endif %} data-toggle="toggle" disabled data-on="Supported" data-off="Unsupported" data-size="small"></td>
+                  <td>
+                      <div class="btn-group">
+                            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                             Action
+                            </button>
+                            <div class="dropdown-menu" role="menu">
+                                <li><a class="dropdown-item" href="#">View Yaml</a></li>
+                                <li><a class="dropdown-item" href="#">Delete Template</a></li>
+                            </div>
+                      </div>
+                  </td>
+                </tr>
+                {% endfor %}
+                </tbody>
+                <tfoot>
+                <tr>
+                  <th>Template Name</th>
+                  <th>Inject Allowed</th>
+                  <th>Cred Hijack Allowed</th>
+                  <th>Modify</th>
+                </tr>
+                </tfoot>
+              </table>
+              <span class="btn btn-info fileinput-button">
+                <i class="glyphicon glyphicon-plus"></i>
+                <span>Add Template...</span>
+                <input id="fileupload" type="file" name="files[]" multiple="">
+              </span>
+              <div id="files" class="files"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+{% endblock %}
+
+{% block footer %}
+
+<script src="static/js/jquery.dataTables.min.js"></script>
+<script src="static/js/dataTables.bootstrap.min.js"></script>
+<script src="static/js/bootstrap-toggle.min.js"></script>
+<script src="static/js/page.user-control-panel.min.js"></script>
+<script src="static/js/jquery.bootstrap.wizard.js"></script>
+<script src="static/js/wizard.min.js"></script>
+<script src="static/js/jquery.validate.min.js"></script>
+<script src="static/js/jquery.ui.widget.js"></script>
+<script src="static/js/jquery.fileupload.js"></script>
+
+<script>
+$(function () {
+    'use strict';
+    
+    var url = 'website-template';
+    $('#fileupload').fileupload({
+        url: url,
+        dataType: 'json'
+      }).bind('fileuploadalways', function (e, data) {
+                window.location.reload(true);
+      })
+});
+</script>
+
+{% endblock %}
