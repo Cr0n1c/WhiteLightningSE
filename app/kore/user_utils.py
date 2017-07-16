@@ -121,9 +121,9 @@ def set_username(username):
         return False
 
     username = username.strip()
-    if len(username) < 5 or len(username) > 15:
+    if len(username) < 5 or len(username) > 25:
         return False
-    elif not re.match("^[A-Za-z0-9_]{5,15}$", username):
+    elif not re.match("^[A-Za-z0-9_]{5,25}$", username):
         return False
 
     # passed all the checks, now formatting it
@@ -133,8 +133,6 @@ def set_username(username):
 def set_password(password):
     # set to match rules in static/js/gsdk-bootstrap-wizard.js
     if password is None:
-        return False
-    elif len(password) < 7 or len(password) > 20:
         return False
     elif not re.match("^[^'\"\\s]+$", password):
         return False

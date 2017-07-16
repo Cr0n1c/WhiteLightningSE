@@ -3,6 +3,8 @@ import os
 
 import urllib3
 
+from ConfigParser import SafeConfigParser
+
 import neo4j
 import query
 import template_login
@@ -12,8 +14,24 @@ import user_utils
 
 urllib3.disable_warnings()
 
+WHITELIGHTNING_CONF_FILE = os.path.join(os.getcwd(), "..", "conf", "whitelightning.conf")
+
+def load_config():
+    if not os.path.isfile(WHITELIGHTNING_CONF_FILE):
+        return False
+
+    parser = SafeConfigParser()
+    with open(WHITELIGHTNING_CONF_FILE) as f:
+        parser.readfp(f)
+
+    return parser
+
 
 def first_run(request_form):
+    resp = neo4j.change_db_password("neo4j", request_form["dbpassword"])
+    if resp != 200:
+        return json.dumps({'success': False}), resp, {'ContentType': 'application/json'}
+
     try:
         # TODO(ecolq): Encrypt as many of these creds as possible and store in neo4j. See Issue #36
         db_server, none = validate_server(request_form["dbserver"], None, "neo4j")
@@ -49,7 +67,7 @@ def first_run(request_form):
 
     # Build INI file
     newline = "\n"
-    with open(os.path.join(os.getcwd(), "..", "conf", "whitelightning.conf"), "w") as f:
+    with open(WHITELIGHTNING_CONF_FILE, "w") as f:
         f.write("[server]" + newline)
         f.write("ip = 0.0.0.0" + newline)
         f.write("port = 80" + newline)
@@ -105,18 +123,18 @@ def create_new_user(request_form, db):
     if len(user) != 0:
         return "Username already exists"
 
-    query = "CREATE (u:_USER {username: '" + profile.username + "'}) " \
-            "SET u.password = '" + profile.encrypted_password + "', " \
-            "u.firstName = '" + profile.first_name + "', " \
-            "u.lastName = '" + profile.last_name + "', " \
-            "u.jobTitle = '" + profile.job_title + "', " \
-            "u.state = '" + profile.state + "', " \
-            "u.country = '" + profile.country + "', " \
-            "u.department = '" + profile.department + "', " \
-            "u.email = '" + profile.email + "', " \
-            "u.isAdmin = " + profile.is_admin + ", " \
-            "u.isDev = " + profile.is_dev + ", " \
-            "u.isEng = " + profile.is_eng + " RETURN u"
+    query =  "CREATE (u:_USER {username: '" + profile.username + "'}) " 
+    query += "SET u.password = '" + profile.encrypted_password + "', " 
+    query += "u.firstName = '" + profile.first_name + "', " 
+    query += "u.lastName = '" + profile.last_name + "', " 
+    query += "u.jobTitle = '" + profile.job_title + "', "
+    query += "u.state = '" + profile.state + "', " 
+    query += "u.country = '" + profile.country + "', " 
+    query += "u.department = '" + profile.department + "', " 
+    query += "u.email = '" + profile.email + "', " 
+    query += "u.isAdmin = " + profile.is_admin + ", " 
+    query += "u.isDev = " + profile.is_dev + ", " 
+    query += "u.isEng = " + profile.is_eng + " RETURN u"
 
     result = db.query_first(query)
 

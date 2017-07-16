@@ -1,6 +1,5 @@
 import os
 import sys
-from ConfigParser import SafeConfigParser
 
 from enum import Enum
 from flask import Flask
@@ -10,6 +9,7 @@ from werkzeug.utils import redirect
 
 from app.routes import routes, initialise_users_for_routes
 
+import kore
 
 class Environment:
     def __init__(self, debug, srvhost, srvport):
@@ -29,17 +29,12 @@ if __name__ == '__main__':
     environment = Environments.PROD if sys.argv[1] and sys.argv[1] == 'prod' else Environments.DEV
 
     # Reading in config
-    parser = SafeConfigParser()
+    parser = kore.load_config()
 
-    try:
-        with open(os.path.join(os.getcwd(), "..", "conf", "whitelightning.conf")) as f:
-            parser.readfp(f)
-    except IOError:
+    if not parser:
         initial_run = True
     else:
         initial_run = False
-
-    initial_run = True
 
     csrf = CSRFProtect()
 

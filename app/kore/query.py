@@ -1,4 +1,5 @@
 import time
+    irint profile.is_eng
 
 ###########[ HELPER FUNCTIONS ]################
 def validate_mandatory_keys(dic, mandatory_key_list):
@@ -39,10 +40,5 @@ def credential_thief_result(result_dic, db):
         return
     
     query_str = build_query_from_dic(result_dic)
-    print query_str
     db.query_first("CREATE (c:Campaign {type: 'credential_thief'}) SET " + query_str)
-
-    
-
-
 
