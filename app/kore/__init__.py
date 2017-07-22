@@ -39,7 +39,7 @@ def first_run(request_form):
         db_password = request_form["dbpassword"]
 
         ui_username = user_utils.set_username(request_form["uiusername"])
-        ui_password = user_utils.set_password(request_form["uipassword"])
+        ui_password = request_form["uipassword"]
 
         (empire_server, empire_port) = validate_server(request_form["empireserver"], request_form["empireport"])
         empire_username = user_utils.set_username(request_form["empireusername"])

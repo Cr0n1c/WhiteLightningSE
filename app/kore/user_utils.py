@@ -139,7 +139,9 @@ def set_password(password):
 
     # passed all the checks, now formatting it
     password = password.strip().encode('utf-8')
+    print "\tCreated new pass: " + password
     encrypted_password = bcrypt.hashpw(password, bcrypt.gensalt())
+    print "\tThe bcrypt version: " + encrypted_password
     return encrypted_password
 
 
