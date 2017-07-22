@@ -2,6 +2,7 @@
 from ConfigParser import SafeConfigParser, NoSectionError
 import json                 
 import os                   
+import urllib2
 
 from flask import Flask, Blueprint, render_template, redirect, url_for, request, session  
 #from flask_wtf.csrf import CSRFProtect
@@ -64,6 +65,8 @@ app = Flask(__name__)
 # Setup ReCaptcha
 def setup_recaptcha():
     global app
+
+    parser = kore.load_config()
     
     if parser:    
         app.config['RECAPTCHA_PUBLIC_KEY'] = parser.get('recaptcha', 'site_key')
@@ -81,15 +84,23 @@ def setup_empire():
     global app
     global empirerpc
 
+    parser = kore.load_config()
+
     if parser:
         app.config['EMPIRERPC_IP'] = parser.get('empirerpc', 'ip')
         app.config['EMPIRERPC_PORT'] = parser.get('empirerpc', 'port')
         app.config['EMPIRERPC_USER'] = parser.get('empirerpc', 'username')
         app.config['EMPIRERPC_PASS'] = parser.get('empirerpc', 'password')
-        empirerpc = EmpireRpc(app.config['EMPIRERPC_IP'],
+
+        # Adding this here until @dg can fix empire in a first class way :D
+        try:
+            empirerpc = EmpireRpc(app.config['EMPIRERPC_IP'],
                               app.config['EMPIRERPC_PORT'],
                               username=app.config['EMPIRERPC_USER'],
                               password=app.config['EMPIRERPC_PASS'])
+        except urllib2.URLError:
+            empirerpc = None
+
     else:    
         app.config['EMPIRERPC_IP'] = ""
         app.config['EMPIRERPC_PORT'] = "" 
@@ -139,7 +150,7 @@ def first_run():
             initialise_users_for_routes()
             setup_empire()
             setup_recaptcha()
-            return render_template('login.html')
+            return redirect(url_for('routes.home'))
     
     return render_template('first-run.html')
 
@@ -250,6 +261,8 @@ if __name__ == '__main__':
     '''
     if not IS_FIRST_RUN:
         initialise_users_for_routes()
+        setup_recaptcha()
+        setup_empire()
 
     app.secret_key = os.urandom(24)
-    app.run(host='0.0.0.0',port=8080)
+    app.run(host='0.0.0.0',port=8080, debug=True)

@@ -78,9 +78,6 @@ def change_db_password(current_password, new_password):
     return resp.status_code
 
 def user_login(username, password, db):
-    print username
-    print password
-    
     error = None
 
     formatted_username = user_utils.set_username(username)
@@ -92,18 +89,11 @@ def user_login(username, password, db):
                           (formatted_username))
    
     try:
-        print "\t password : " + password
-        print "\t bcrypt_password: " + bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
-        print "\t db password: " + user["u"]["password"]
-
         if len(user) == 0 or not bcrypt.checkpw(password.encode('utf-8'), user["u"]["password"].encode('utf-8')):
             error = "Username and password combo do not match"
     except ValueError:
         error = "Database password is jacked up for this user"
     
-    print "---------------------------"
-    print error
-    print "---------------------------"
     return error
 
 
