@@ -134,6 +134,8 @@ def set_password(password):
     # set to match rules in static/js/gsdk-bootstrap-wizard.js
     if password is None:
         return False
+    elif len(password) < 7 or len(password) > 25:
+        return False
     elif not re.match("^[^'\"\\s]+$", password):
         return False
 
