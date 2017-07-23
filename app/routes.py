@@ -1,7 +1,8 @@
 #!/usr/bin/python
-from ConfigParser import SafeConfigParser
+from ConfigParser import SafeConfigParser, NoSectionError
 import json                 
 import os                   
+import urllib2
 
 from flask import Flask, Blueprint, render_template, redirect, url_for, request, session  
 #from flask_wtf.csrf import CSRFProtect
@@ -48,15 +49,12 @@ def update_page(current_title, current_url):
 #########[ APP STARTUP ]###################
 
 #Reading in config
-parser = SafeConfigParser()
+parser = kore.load_config()
 
-try:
-    with open(os.path.join(os.getcwd(),"..", "conf", "whitelightning.conf")) as f:
-        parser.readfp(f)
-except IOError:
-    initial_run = True
+if parser is False:
+    IS_FIRST_RUN = True
 else:
-    initial_run = False
+    IS_FIRST_RUN = False
 
 #csrf = CSRFProtect()
 
@@ -64,20 +62,51 @@ routes = Blueprint('routes', __name__)
 app = Flask(__name__)
 #csrf.init_app(app) 
 
-# Setup Recaptcha
-app.config['RECAPTCHA_PUBLIC_KEY'] = parser.get('recaptcha', 'site_key')
-app.config['RECAPTCHA_PRIVATE_KEY'] = parser.get('recaptcha', 'secret_key')
-app.config['RECAPTCHA_DATA_ATTRS'] = {'size': 'compact'}                           
+# Setup ReCaptcha
+def setup_recaptcha():
+    global app
+
+    parser = kore.load_config()
+    
+    if parser:    
+        app.config['RECAPTCHA_PUBLIC_KEY'] = parser.get('recaptcha', 'site_key')
+        app.config['RECAPTCHA_PRIVATE_KEY'] = parser.get('recaptcha', 'secret_key')
+    else:    
+        app.config['RECAPTCHA_PUBLIC_KEY'] = ""
+        app.config['RECAPTCHA_PRIVATE_KEY'] = ""
+    
+    app.config['RECAPTCHA_DATA_ATTRS'] = {'size': 'compact'}
 
 # Setup EmpireRPC
-app.config['EMPIRERPC_IP'] = parser.get('empirerpc', 'ip')
-app.config['EMPIRERPC_PORT'] = parser.get('empirerpc', 'port')
-app.config['EMPIRERPC_USER'] = parser.get('empirerpc', 'username')
-app.config['EMPIRERPC_PASS'] = parser.get('empirerpc', 'password')
-empirerpc = EmpireRpc(app.config['EMPIRERPC_IP'],
-                      app.config['EMPIRERPC_PORT'],
-                      username=app.config['EMPIRERPC_USER'],
-                      password=app.config['EMPIRERPC_PASS'])
+empirerpc = None
+
+def setup_empire():
+    global app
+    global empirerpc
+
+    parser = kore.load_config()
+
+    if parser:
+        app.config['EMPIRERPC_IP'] = parser.get('empirerpc', 'ip')
+        app.config['EMPIRERPC_PORT'] = parser.get('empirerpc', 'port')
+        app.config['EMPIRERPC_USER'] = parser.get('empirerpc', 'username')
+        app.config['EMPIRERPC_PASS'] = parser.get('empirerpc', 'password')
+
+        # Adding this here until @dg can fix empire in a first class way :D
+        try:
+            empirerpc = EmpireRpc(app.config['EMPIRERPC_IP'],
+                              app.config['EMPIRERPC_PORT'],
+                              username=app.config['EMPIRERPC_USER'],
+                              password=app.config['EMPIRERPC_PASS'])
+        except urllib2.URLError:
+            empirerpc = None
+
+    else:    
+        app.config['EMPIRERPC_IP'] = ""
+        app.config['EMPIRERPC_PORT'] = "" 
+        app.config['EMPIRERPC_USER'] = ""
+        app.config['EMPIRERPC_PASS'] = ""
+
 
 @routes.route('/')
 @routes.route('/home')
@@ -88,6 +117,9 @@ def home():
 
 @routes.route('/login', methods=['GET', 'POST'])
 def login():
+    if IS_FIRST_RUN:
+        return redirect(url_for('routes.first_run'))
+
     form = kore.template_login.LoginForm()
 
     if form.validate_on_submit() and \
@@ -106,12 +138,21 @@ def logout():
 
 @routes.route('/first-run', methods=['GET', 'POST'])
 def first_run():
+    global IS_FIRST_RUN
+
+    if not IS_FIRST_RUN:
+        return redirect(url_for('routes.home'))
+
     if request.method == 'POST':
         status = kore.first_run(request.form)
         if status[1] == 200:
-            return login()
-    else:
-        return render_template('first-run.html')
+            IS_FIRST_RUN = False
+            initialise_users_for_routes()
+            setup_empire()
+            setup_recaptcha()
+            return redirect(url_for('routes.home'))
+    
+    return render_template('first-run.html')
 
 @routes.route('/user-control-panel', methods=['GET', 'POST'])
 def user_control_panel():
@@ -218,6 +259,10 @@ if __name__ == '__main__':
     '''
     This is to enable debug testing of routes directly in Flask.  Not for production run through nginx/uwsgi.
     '''
-    initialise_users_for_routes()
+    if not IS_FIRST_RUN:
+        initialise_users_for_routes()
+        setup_recaptcha()
+        setup_empire()
+
     app.secret_key = os.urandom(24)
-    app.run(host='0.0.0.0',port=8080)
+    app.run(host='0.0.0.0',port=8080, debug=True)
