@@ -106,15 +106,16 @@ EOF
 
 chown -R www-whili:www-data /var/www/WhiteLightningSE
 
+cd /var/www/WhiteLightningSE/
+pip install -r requirements.txt
+
 systemctl enable neo4j
 systemctl start neo4j
 systemctl start whitelightning.uwsgi
 systemctl reload nginx
 
-cd /var/www/WhiteLightningSE/
-pip install -r requirements.txt
-
-echo "[ ] Setup complete. Recommend setting up SSL (e.g. with LetsEncrypt)"
+echo "[ ] Setup complete. You can now access the site at http://$FQDN/"
+echo "[!] Recommend setting up SSL (e.g. with LetsEncrypt)"
 echo "sudo add-apt-repository ppa:certbot/certbot
 sudo apt-get update
 sudo apt-get install certbot
