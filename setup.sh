@@ -19,7 +19,6 @@ function check_install_pkg {
 echo "[ ] Installing pip, nginx, and uwsgi"
 check_install_pkg python-pip
 check_install_pkg nginx
-check_install_pkg uwsgi-core
 
 echo "[ ] Installing neo4j"
 if [ ! -e "/etc/apt/sources.list.d/neo4j.list" ]; then
@@ -44,7 +43,7 @@ After=neo4j.service
 WorkingDirectory=/var/www/WhiteLightningSE/app
 User=www-whili
 Group=www-data
-ExecStart=/usr/bin/uwsgi --ini ../conf/whitelightning.conf
+ExecStart=/usr/local/bin/uwsgi --ini ../conf/uwsgi.conf
 RuntimeDirectory=uwsgi
 Restart=always
 KillSignal=SIGQUIT
@@ -87,11 +86,25 @@ server {
 }
 EOF
 
+
 mkdir -p /var/www/WhiteLightningSE
 cp -R app/ /var/www/WhiteLightningSE/.
 cp -R conf/ /var/www/WhiteLightningSE/.
 cp _config.yml /var/www/WhiteLightningSE/.
 cp requirements.txt /var/www/WhiteLightningSE/.
+
+cat << EOF > /var/www/WhiteLigningSE/conf/uwsgi.conf
+[uwsgi]
+module = routes
+callable = app
+master = true
+processes = 5
+socket = /var/www/WhiteLightningSE/whitelightning.sock
+chmod-socket = 660
+vacuum = true
+die-on-term = true
+logger = file:/var/log/uwsgi.log
+EOF
 
 systemctl enable neo4j
 systemctl start neo4j
