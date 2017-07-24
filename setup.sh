@@ -30,7 +30,6 @@ check_install_pkg neo4j
 
 echo "[ ] Creating www-whili user"
 adduser www-whili --disabled-login --system --disabled-password --ingroup www-data --home /var/www/WhiteLightningSE --shell /bin/false
-chown -R www-whili:www-data /var/www/WhiteLightningSE
 
 echo "[ ] Setting up services."
 mkdir -p /var/run/neo4j
@@ -86,14 +85,13 @@ server {
 }
 EOF
 
-
 mkdir -p /var/www/WhiteLightningSE
 cp -R app/ /var/www/WhiteLightningSE/.
 cp -R conf/ /var/www/WhiteLightningSE/.
 cp _config.yml /var/www/WhiteLightningSE/.
 cp requirements.txt /var/www/WhiteLightningSE/.
 
-cat << EOF > /var/www/WhiteLigningSE/conf/uwsgi.conf
+cat << EOF > /var/www/WhiteLightningSE/conf/uwsgi.conf
 [uwsgi]
 module = routes
 callable = app
@@ -106,10 +104,12 @@ die-on-term = true
 logger = file:/var/log/uwsgi.log
 EOF
 
+chown -R www-whili:www-data /var/www/WhiteLightningSE
+
 systemctl enable neo4j
 systemctl start neo4j
 systemctl start whitelightning.uwsgi
-systemctl start nginx
+systemctl reload nginx
 
 cd /var/www/WhiteLightningSE/
 pip install -r requirements.txt
