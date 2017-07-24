@@ -1,22 +1,27 @@
 #!/bin/bash
 
+if [[ $EUID -ne 0 ]]; then
+   echo " [!] This script must be run as root" 1>&2
+   exit 1
+fi
+
 function check_install_pkg {
     PKG_OK=$(dpkg-query -W --showformat='${Status}\n' $1|grep "install ok installed")
-    echo Checking for $1: $PKG_OK
+    echo "[ ] Checking for $1: $PKG_OK"
     if [ "" == "$PKG_OK" ]; then
-        echo "$1 not installed. Setting up $1."
-        apt-get --yes install $1
+        echo "[-] $1 not installed. Setting up $1."
+        apt-get --yes -q=2 install $1
     else
-        echo "$1 already installed."
+        echo "[+] $1 already installed."
     fi
 }
 
-echo "Installing pip, nginx, and uwsgi"
+echo "[ ] Installing pip, nginx, and uwsgi"
 check_install_pkg python-pip
 check_install_pkg nginx
 check_install_pkg uwsgi-core
 
-echo "Installing neo4j"
+echo "[ ] Installing neo4j"
 if [ ! -e "/etc/apt/sources.list.d/neo4j.list" ]; then
     wget -O - http://debian.neo4j.org/neotechnology.gpg.key | apt-key add -
     echo 'deb http://debian.neo4j.org/repo stable/' > /etc/apt/sources.list.d/neo4j.list
@@ -24,43 +29,22 @@ if [ ! -e "/etc/apt/sources.list.d/neo4j.list" ]; then
 fi
 check_install_pkg neo4j
 
-echo "Create Whili user"
-adduser --no-create-home --disabled-login www-whili
+echo "[ ] Creating www-whili user"
+adduser www-whili --disabled-login --system --disabled-password --ingroup www-data --home /var/www/WhiteLightningSE --shell /bin/false
+chown -R www-whili:www-data /var/www/WhiteLightningSE
 
-echo "Setting up services."
+echo "[ ] Setting up services."
 mkdir -p /var/run/neo4j
-NEO4J=$(which neo4j)
-cat < EOF > /etc/systemd/system/neo4j.service
-[Unit]
-Description=Neo4j Management Service
-After=syslog.target
-
-[Service]
-Type=forking
-User=neo4j
-ExecStart=/usr/bin/neo4j start
-ExecStop=/usr/bin/neo4j stop
-RemainAfterExit=no
-Restart=on-failure
-PIDFile=/opt/neo4j-community-3.2.0/run/neo4j.pid
-LimitNOFILE=60000
-TimeoutSec=600
-
-[Install]
-WantedBy=multi-user.target
-EOF
-
-cat < EOF > /etc/systemd/system/whitelightning.uwsgi.service
+cat << EOF > /etc/systemd/system/whitelightning.uwsgi.service
 [Unit]
 Description=uWSGI for WhiteLightning
 After=neo4j.service
 
 [Service]
-Environment="PATH=/var/www/WhiteLightningSE/whitelightning/bin"
-WorkingDirectory=/var/www/WhiteLightningSE/
+WorkingDirectory=/var/www/WhiteLightningSE/app
 User=www-whili
 Group=www-data
-ExecStart=/usr/local/bin/uwsgi --ini conf/whitelightning.conf
+ExecStart=/usr/bin/uwsgi --ini ../conf/whitelightning.conf
 RuntimeDirectory=uwsgi
 Restart=always
 KillSignal=SIGQUIT
@@ -72,23 +56,35 @@ NotifyAccess=all
 WantedBy=multi-user.target
 EOF
 
-cat < EOF > /etc/systemd/system/nginx.service
-[Unit]
-Description=A high performance web server and a reverse proxy server
-After=whitelightning.uwsgi.service
+echo "[?] Enter the FQDN of your server (or IP): "
+read FQDN
 
-[Service]
-Type=forking
-PIDFile=/run/nginx.pid
-ExecStartPre=/usr/sbin/nginx -t -q -g 'daemon on; master_process on;'
-ExecStart=/usr/sbin/nginx -g 'daemon on; master_process on;'
-ExecReload=/usr/sbin/nginx -g 'daemon on; master_process on;' -s reload
-ExecStop=-/sbin/start-stop-daemon --quiet --stop --retry QUIT/5 --pidfile /run/nginx.pid
-TimeoutStopSec=5
-KillMode=mixed
+cp /etc/nginx/nginx.conf{,.bak}
+cat << EOF > /etc/nginx/nginx.conf
+worker_processes auto;
+user www-whili www-data;
 
-[Install]
-WantedBy=multi-user.target
+events {
+    worker_connections 4096;
+}
+
+http{
+server {
+    listen 80;
+    server_name $FQDN;
+    access_log /var/log/nginx_access.log;
+    error_log /var/log/nginx_error.log;
+    error_page   404  /404.html;
+
+    location / {
+        include uwsgi_params;
+        uwsgi_pass unix:/var/www/WhiteLightningSE/whitelightning.sock;
+        uwsgi_param   UWSGI_CHDIR     /var/www/WhiteLightning/app;
+        uwsgi_param   UWSGI_MODULE    routes;
+        uwsgi_param   UWSGI_CALLABLE  app;
+    }
+}
+}
 EOF
 
 mkdir -p /var/www/WhiteLightningSE
@@ -96,3 +92,24 @@ cp -R app/ /var/www/WhiteLightningSE/.
 cp -R conf/ /var/www/WhiteLightningSE/.
 cp _config.yml /var/www/WhiteLightningSE/.
 cp requirements.txt /var/www/WhiteLightningSE/.
+
+systemctl enable neo4j
+systemctl start neo4j
+systemctl start whitelightning.uwsgi
+systemctl start nginx
+
+cd /var/www/WhiteLightningSE/
+pip install -r requirements.txt
+
+echo "[ ] Setup complete. Recommend setting up SSL (e.g. with LetsEncrypt)"
+echo "sudo add-apt-repository ppa:certbot/certbot
+sudo apt-get update
+sudo apt-get install certbot
+
+certbot --nginx
+
+systemctl restart nginx
+
+#Auto-renew
+crontab -e
+27 3 * * * /usr/bin/certbot renew --quiet --renew-hook \"/usr/sbin/systemctl reload-or-restart nginx\""
