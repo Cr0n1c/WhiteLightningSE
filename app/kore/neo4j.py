@@ -1,19 +1,27 @@
 import bcrypt
 import os
+import requests
+
 from ConfigParser import SafeConfigParser
 
 import py2neo
 
 import user_utils
 
-# Reading from config file
-parser = SafeConfigParser()
-with open(os.path.join(os.getcwd(), "..", "conf", "whitelightning.conf")) as f:
-    parser.readfp(f)
+from __init__ import load_config
 
-DB_SERVER = parser.get('database', 'url')
-DB_USERNAME = parser.get('database', 'username')
-DB_PASSWORD = parser.get('database', 'password')
+# Reading from config file
+parser = load_config()
+if not parser:
+    DB_SERVER = "127.0.0.1"
+    DB_USERNAME = "neo4j"
+    DB_PASSWORD = "neo4j"
+    PARSER_DETECTED = False
+else:
+    DB_SERVER = parser.get('database', 'url')
+    DB_USERNAME = parser.get('database', 'username')
+    DB_PASSWORD = parser.get('database', 'password')
+    PARSER_DETECTED = True
 
 # Flushing out the parser var for security
 parser = None
@@ -21,14 +29,27 @@ parser = None
 
 class Initialize(object):
     def __init__(self, username=DB_USERNAME, password=DB_PASSWORD):
-        self.username = username
-        self.password = password
+        if not self.set_creds():
+            self.username = username
+            self.password = password
         self.connect(self.username, self.password)
 
     def __del__(self):
         self.username = None
         self.password = None
         self.graph = None
+
+    def set_creds(self):
+        if not PARSER_DETECTED:
+            parser = load_config()
+            if parser is False:
+                return False
+            else:
+                self.username = parser.get('database', 'username')
+                self.password = parser.get('database', 'password')
+                return True
+        
+        return False
 
     def connect(self, username, password):
         try:
@@ -50,13 +71,18 @@ class Initialize(object):
             return ""
 
 
+def change_db_password(current_password, new_password):
+    headers = {'Content-Type': 'application/json', }
+    data = '{"password":"' + new_password + '"}'
+    resp = requests.post('http://localhost:7474/user/neo4j/password', headers=headers, data=data, auth=('neo4j', current_password))
+    return resp.status_code
+
 def user_login(username, password, db):
     error = None
 
     formatted_username = user_utils.set_username(username)
-    encrypted_password = user_utils.set_password(password)
 
-    if not formatted_username or not encrypted_password:
+    if not formatted_username:
         return "Something phishy is happening"
 
     user = db.query_first("MATCH (u:_USER {username: '%s'}) RETURN u" %
@@ -67,6 +93,7 @@ def user_login(username, password, db):
             error = "Username and password combo do not match"
     except ValueError:
         error = "Database password is jacked up for this user"
+    
     return error
 
 
