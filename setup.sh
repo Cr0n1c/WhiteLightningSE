@@ -33,6 +33,9 @@ adduser www-whili --disabled-login --system --disabled-password --ingroup www-da
 
 echo "[ ] Setting up services."
 mkdir -p /var/run/neo4j
+touch /var/log/uwsgi.log
+chown www-whili:www-data /var/log/uwsgi.log
+chmod 660 /var/log/uwsgi.log
 cat << EOF > /etc/systemd/system/whitelightning.uwsgi.service
 [Unit]
 Description=uWSGI for WhiteLightning
