@@ -111,6 +111,7 @@ pip install -r requirements.txt
 
 systemctl enable neo4j
 systemctl start neo4j
+systemctl enable whitelightning.uwsgi
 systemctl start whitelightning.uwsgi
 systemctl reload nginx
 
