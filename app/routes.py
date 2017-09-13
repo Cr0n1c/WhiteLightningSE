@@ -60,6 +60,7 @@ else:
 
 routes = Blueprint('routes', __name__)
 app = Flask(__name__)
+app.secret_key = os.urandom(24)
 #csrf.init_app(app) 
 
 # Setup ReCaptcha
